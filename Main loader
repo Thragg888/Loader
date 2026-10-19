@@ -1,54 +1,7 @@
 repeat task.wait() until game:IsLoaded()
 
 -- ==========================================
--- DYNAMIC ID LOADER
--- ==========================================
-local ID_URL = "https://raw.githubusercontent.com/Thragg888/Potential-man/main/ids.lua"
-
-local FALLBACK_IDS = {
-    punchAnimIds = { "87259391926321","99100240941590","72685103823181","81905101227053","113936304594883","140703210927645","136007065400978","129843313690921","86709774283672","108807732150251","138040001965654","86096387000557","119850211147676","131696603025265","119462383658044","116618003477002","133491532453922","76649505662612","71190646367497" },
-    blockAnimIds = { "72722244508749","96959123077498","95802026624883","140671644163156","100926346851492" },
-    chargeAnimIds = { "106014898538300" },
-    autoBlockTriggerAnims = { "114506382930939","127245564598429","99829427721752","138938529389204","111647315359080","92567970681901","124269076578545","94958041603347","109667959938617","130958529065375","118298475669935","126830014841198","18885909645","98456918873918","105458270463374","83829782357897","125403313786645","82113744478546","70371667919898","99135633258223","7167027849946","109230267448394","126996426760253","106538427162796","122709416391891","90620531468240","91509234639766","99824350842479","126171487400618","101101433684051","106860049270347","70483423693126","126727756047566","137642639873297","77375846492436","121293883585738","81639435858902","137314737492715","92173139187970","108196996477620","90819435118493","123172382755876" },
-    autoBlockTriggerSounds = { "102228729296384","140242176732868","112809109188560","136323728355613","115026634746636","84116622032112","108907358619313","127793641088496","86174610237192","95079963655241","101199185291628","119942598489800","84307400688050","105200830849301","75330693422988","82221759983649","81702359653578","108610718831698","112395455254818","109431876587852","109348678063422","85853080745515","12222216","105840448036441","114742322778642","119583605486352","79980897195554","71805956520207","79391273191671","89004992452376","101553872555606","101698569375359","106300477136129","116581754553533","117231507259853","119089145505438","121954639447247","125213046326879","131406927389838","86833981571073","110372418055226","86494585504534","80516583309685","140412278320643","117173212095661","104910828105172","140194172008986","85544168523099","114506382930939","99829427721752","120059928759346","104625283622511","105316545074913","126131675979001","82336352305186","93366464803829","84069821282466","128856426573270","128195973631079","124903763333174","94317217837143","98111231282218","136728245733659","107444859834748","76959687420003","72425554233832","96594507550917","139996647355899","107345261604889","127557531826290","108651070773439","74842815979546","124397369810639","76467993976301","118493324723683","78298577002481","116527305931161","5148302439","98675142200448","128367348686124","103684883268194","109246041199659","80540530406270","139523195429581","105204810054381","116468089135195","133709029886490","124234993291213","98733709078792","99856718263455","74809026448465","99215225043220","79612713897495" },
-    guestParryAnims = { "72722244508749","96959123077498","95802026624883","140671644163156","100926346851492" },
-    killerParryAnims = { "116618003477002","111918351126361","108018357044094","83745199070305","133491532453922","90499469533503" },
-}
-
-local function loadRemoteIDs()
-    local ok, body = pcall(function()
-        return game:HttpGet(ID_URL, true)
-    end)
-    if not ok or type(body) ~= "string" or #body < 20 then
-        warn("[Slashsaken] ID fetch failed, using fallback")
-        return FALLBACK_IDS
-    end
-    local fn, err = loadstring(body)
-    if not fn then
-        warn("[Slashsaken] ID file syntax error: " .. tostring(err))
-        return FALLBACK_IDS
-    end
-    local ok2, result = pcall(fn)
-    if not ok2 or type(result) ~= "table" then
-        warn("[Slashsaken] ID file did not return a table")
-        return FALLBACK_IDS
-    end
-    local merged = {}
-    for key, fallback in pairs(FALLBACK_IDS) do
-        if type(result[key]) == "table" then
-            merged[key] = result[key]
-        else
-            merged[key] = fallback
-        end
-    end
-    print("[Slashsaken] IDs loaded v" .. tostring(result.version or "?"))
-    return merged
-end
-
-local IDS = loadRemoteIDs()
-
--- ==========================================
--- SLASHSAKEN SPLASH (340x230, 3s)
+-- SLASHSAKEN SPLASH (340x230, 3s total)
 -- ==========================================
 local function showSplash()
     local TweenService = game:GetService("TweenService")
@@ -232,10 +185,10 @@ local flickWindow             = 0.25
 local flickData               = {}
 
 -- M1 RECOVERY LOCKOUT
-local lastM1Time       = 0
-local _lastM1Detection = 0
-local M1_RECOVERY      = 0.4
-local m1LockoutEnabled = true
+local lastM1Time              = 0
+local _lastM1Detection        = 0
+local M1_RECOVERY             = 0.4
+local m1LockoutEnabled        = true
 
 -- KILLER AUTO-PARRY
 local killerAutoParryEnabled    = false
@@ -249,21 +202,60 @@ local killerParryRangeVisual    = nil
 local killerParryTrackSeen      = setmetatable({}, { __mode = "k" })
 local killerParryLastStatusTime = 0
 
--- ==========================================
--- IDS FROM REMOTE FILE (with fallback already loaded)
--- ==========================================
-local blockAnimIds    = IDS.blockAnimIds
-local punchAnimIds    = IDS.punchAnimIds
-local chargeAnimIds   = IDS.chargeAnimIds
-local GUEST_PARRY_ANIMS = IDS.guestParryAnims
+local GUEST_PARRY_ANIMS = {
+    "72722244508749",
+    "96959123077498",
+    "95802026624883",
+    "140671644163156",
+    "100926346851492",
+}
+
+local blockAnimIds  = { "72722244508749","96959123077498","95802026624883","140671644163156","100926346851492" }
+local punchAnimIds  = { "87259391926321","99100240941590","72685103823181","81905101227053","113936304594883","140703210927645","136007065400978","129843313690921","86709774283672","108807732150251","138040001965654","86096387000557","119850211147676","131696603025265","119462383658044","116618003477002","133491532453922","76649505662612","71190646367497" }
+local chargeAnimIds = { "106014898538300" }
 
 local animsToDetect = {}
-for _, id in ipairs(IDS.punchAnimIds) do animsToDetect[id] = true end
+for _, id in ipairs({"87259391926321","99100240941590","72685103823181","81905101227053","113936304594883","140703210927645","136007065400978","129843313690921","86709774283672","108807732150251","138040001965654","86096387000557","119850211147676","131696603025265","119462383658044","116618003477002","133491532453922","76649505662612","71190646367497"}) do animsToDetect[id] = true end
 
 local autoBlockTriggerSounds = {}
-for _, id in ipairs(IDS.autoBlockTriggerSounds) do autoBlockTriggerSounds[id] = true end
+for _, id in ipairs({
+    "102228729296384","140242176732868","112809109188560","136323728355613","115026634746636",
+    "84116622032112","108907358619313","127793641088496","86174610237192","95079963655241",
+    "101199185291628","119942598489800","84307400688050","105200830849301","75330693422988",
+    "82221759983649","81702359653578","108610718831698","112395455254818","109431876587852",
+    "109348678063422","85853080745515","12222216","105840448036441","114742322778642",
+    "119583605486352","79980897195554","71805956520207","79391273191671","89004992452376",
+    "101553872555606","101698569375359","106300477136129","116581754553533","117231507259853",
+    "119089145505438","121954639447247","125213046326879","131406927389838","86833981571073",
+    "110372418055226","86494585504534","80516583309685","140412278320643","117173212095661",
+    "140194172008986","85544168523099","114506382930939","99829427721752","120059928759346",
+    "104625283622511","105316545074913","126131675979001","82336352305186","93366464803829",
+    "84069821282466","128856426573270","128195973631079","124903763333174","94317217837143",
+    "98111231282218","136728245733659","107444859834748","76959687420003","72425554233832",
+    "96594507550917","139996647355899","107345261604889","127557531826290","108651070773439",
+    "74842815979546","124397369810639","76467993976301","118493324723683","5148302439",
+    "98675142200448","128367348686124","103684883268194","109246041199659","80540530406270",
+    "139523195429581","105204810054381","116468089135195","133709029886490","124234993291213",
+    "98733709078792","99856718263455","74809026448465","99215225043220","79612713897495",
+}) do autoBlockTriggerSounds[id] = true end
 
-local autoBlockTriggerAnims = IDS.autoBlockTriggerAnims
+local autoBlockTriggerAnims = {
+    "114506382930939","127245564598429","99829427721752","138938529389204","111647315359080",
+    "92567970681901","124269076578545","94958041603347","109667959938617","130958529065375",
+    "118298475669935","126830014841198","18885909645","98456918873918","105458270463374",
+    "83829782357897","125403313786645","82113744478546","70371667919898","99135633258223",
+    "7167027849946","109230267448394","126996426760253","106538427162796","122709416391891",
+    "90620531468240","91509234639766","99824350842479","126171487400618","101101433684051",
+    "106860049270347","70483423693126","126727756047566","137642639873297","77375846492436",
+    "121293883585738","81639435858902","137314737492715","92173139187970","108196996477620",
+    "90819435118493","123172382755876"
+}
+
+local killerState       = {}
+local soundHooks        = {}
+local soundBlockedUntil = {}
+local detectionCircles  = {}
+local facingVisuals     = {}
 
 -- ==========================================
 -- HELPLESS DETECTION
@@ -649,7 +641,7 @@ local function removeKillerCircle(killer)
 end
 
 -- ==========================================
--- SOUND HOOK
+-- SOUND HOOK (no more antiFlickOn check)
 -- ==========================================
 local function extractNumericSoundId(sound)
     if not sound or not sound.SoundId then return nil end
@@ -728,12 +720,6 @@ local function hookSound(sound)
     sound:GetPropertyChangedSignal("IsPlaying"):Connect(function() if sound.IsPlaying then fire() end end)
     if sound.IsPlaying then fire() end
 end
-
-local soundHooks        = {}
-local soundBlockedUntil = {}
-local detectionCircles  = {}
-local facingVisuals     = {}
-local killerState       = {}
 
 -- ==========================================
 -- INVISIBILITY
@@ -1018,7 +1004,7 @@ FCRight:AddInput("FP_Window", { Text = "Flick Window (seconds)", Default = "0.25
 
 -- NOTICE TAB
 Tabs.Notice:AddGroupbox({ Side="Left", Name="Info", IconName="info" }):AddLabel({
-    Text = "Slashsaken [Beta]\n\nBy viltrumite\n\n• IDs loaded from Thragg888/Potential-man/ids.lua\n• Auto Block — giant circle around killer\n• Facing Check — forward circle only\n• M1 Recovery Lockout — block suppressed 0.4s after M1\n• HDT — smooth walk into killer, 27s cooldown\n• Helpless guard — block/HDT skip while helpless\n• Killer Auto-Parry — JohnDoe/Slasher only",
+    Text = "Slashsaken [Beta]\n\nBy viltrumite\n\n• Auto Block — giant circle around killer\n• Facing Check — forward circle only\n• M1 Recovery Lockout — block stops firing 0.4s after your M1\n• Block fires during abilities (no ability lockout)\n• HDT — smooth walk into killer, 27s shared cooldown\n• Helpless guard — block/HDT skip while helpless\n• Killer Auto-Parry — 404Error/RagingPace (JohnDoe/Slasher only)",
     DoesWrap = true,
 })
 
@@ -1098,7 +1084,7 @@ KPBox:AddToggle("KP_On", {
 })
 KPBox:AddInput("KP_AnimIds", {
     Text = "Extra Parry Anim IDs (comma-separated)",
-    Default = table.concat(IDS.killerParryAnims, ","),
+    Default = "116618003477002,111918351126361,108018357044094,83745199070305,133491532453922,90499469533503",
     ClearTextOnFocus = false,
     Tooltip = "Guest 1337 parry anims are auto-added. Punch anims are NOT used.",
     Callback = function(v) updateKillerParryAnims(v) end,
@@ -1206,10 +1192,10 @@ task.spawn(function()
     end
 end)
 
-updateKillerParryAnims(table.concat(IDS.killerParryAnims, ","))
+updateKillerParryAnims("116618003477002,111918351126361,108018357044094,83745199070305,133491532453922,90499469533503")
 
 -- ==========================================
--- M1 DETECTION
+-- M1 DETECTION (drives recovery lockout)
 -- ==========================================
 RunService.RenderStepped:Connect(function()
     if not cachedAnimator then refreshAnimator() end
@@ -1249,7 +1235,7 @@ task.spawn(function()
     lp.CharacterAdded:Connect(function() task.wait(0.9); connect() end)
 end)
 
--- AUTO BLOCK MAIN LOOP
+-- AUTO BLOCK MAIN LOOP (with M1 lockout check)
 RunService.RenderStepped:Connect(function()
     if not autoBlockOn then return end
     if isHelpless() then return end
