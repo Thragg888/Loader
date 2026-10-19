@@ -1,0 +1,1311 @@
+# Loaderrepeat task.wait() until game:IsLoaded()
+warn("[Slashsaken] Loading...")
+local _t0 = tick()
+
+-- SPLASH
+local function splash()
+    local TS = game:GetService("TweenService")
+    local PG = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+    local g = Instance.new("ScreenGui")
+    g.Name="Splash"; g.ResetOnSpawn=false; g.IgnoreGuiInset=true
+    g.DisplayOrder=999999; g.Parent=PG
+    local bg=Instance.new("Frame",g)
+    bg.Size=UDim2.new(1,0,1,0); bg.BackgroundColor3=Color3.new()
+    bg.BackgroundTransparency=1
+    local c=Instance.new("Frame",g)
+    c.AnchorPoint=Vector2.new(0.5,0.5); c.Position=UDim2.new(0.5,0,0.5,0)
+    c.Size=UDim2.new(0,340,0,230); c.BackgroundColor3=Color3.fromRGB(18,18,24)
+    c.BackgroundTransparency=1
+    Instance.new("UICorner",c).CornerRadius=UDim.new(0,12)
+    local sk=Instance.new("UIStroke",c)
+    sk.Color=Color3.fromRGB(220,50,50); sk.Thickness=2; sk.Transparency=1
+    local i1=Instance.new("ImageLabel",c)
+    i1.AnchorPoint=Vector2.new(1,0.5); i1.Position=UDim2.new(0.5,-6,0.38,0)
+    i1.Size=UDim2.new(0,110,0,110); i1.BackgroundTransparency=1
+    i1.Image="rbxassetid://130582019929746"; i1.ImageTransparency=1
+    i1.ScaleType=Enum.ScaleType.Fit
+    local i2=Instance.new("ImageLabel",c)
+    i2.AnchorPoint=Vector2.new(0,0.5); i2.Position=UDim2.new(0.5,6,0.38,0)
+    i2.Size=UDim2.new(0,110,0,110); i2.BackgroundTransparency=1
+    i2.Image="rbxassetid://76765831712854"; i2.ImageTransparency=1
+    i2.ScaleType=Enum.ScaleType.Fit
+    local t=Instance.new("TextLabel",c)
+    t.AnchorPoint=Vector2.new(0.5,0.5); t.Position=UDim2.new(0.5,0,0.82,0)
+    t.Size=UDim2.new(1,-20,0,26); t.BackgroundTransparency=1
+    t.Font=Enum.Font.GothamBold; t.TextSize=18; t.TextColor3=Color3.new(1,1,1)
+    t.TextTransparency=1; t.Text="Loading Slashsaken..."
+    pcall(function() game:GetService("ContentProvider"):PreloadAsync({"rbxassetid://130582019929746","rbxassetid://76765831712854"}) end)
+    local I=TweenInfo.new(0.3,Enum.EasingStyle.Quad,Enum.EasingDirection.Out)
+    local O=TweenInfo.new(0.4,Enum.EasingStyle.Quad,Enum.EasingDirection.In)
+    TS:Create(bg,I,{BackgroundTransparency=0.35}):Play()
+    TS:Create(c,I,{BackgroundTransparency=0.03}):Play()
+    TS:Create(sk,I,{Transparency=0}):Play()
+    TS:Create(i1,I,{ImageTransparency=0}):Play()
+    TS:Create(i2,I,{ImageTransparency=0}):Play()
+    TS:Create(t,I,{TextTransparency=0}):Play()
+    task.delay(2.4,function()
+        pcall(function() t.Text="Slashsaken Loaded!"; t.TextColor3=Color3.fromRGB(120,255,120); sk.Color=Color3.fromRGB(120,255,120) end)
+        TS:Create(bg,O,{BackgroundTransparency=1}):Play()
+        TS:Create(c,O,{BackgroundTransparency=1}):Play()
+        TS:Create(sk,O,{Transparency=1}):Play()
+        TS:Create(i1,O,{ImageTransparency=1}):Play()
+        TS:Create(i2,O,{ImageTransparency=1}):Play()
+        TS:Create(t,O,{TextTransparency=1}):Play()
+        task.delay(0.5,function() pcall(function() g:Destroy() end) end)
+    end)
+end
+splash()
+
+-- SERVICES
+local Players=game:GetService("Players")
+local RS=game:GetService("ReplicatedStorage")
+local Run=game:GetService("RunService")
+local UIS=game:GetService("UserInputService")
+local WS=game:GetService("Workspace")
+local L=game:GetService("Lighting")
+local TCS=game:GetService("TextChatService")
+local lp=Players.LocalPlayer
+local PG=lp:WaitForChild("PlayerGui")
+
+local remote
+do local ok,r=pcall(function() return RS.Modules.Network.Network.RemoteEvent end)
+   remote=ok and r or nil end
+
+-- OBSIDIAN
+local Lib,TM,SM
+do
+    local repo="https://raw.githubusercontent.com/deividcomsono/Obsidian/main/"
+    local ok,l=pcall(function() return loadstring(game:HttpGet(repo.."Library.lua"))() end)
+    if not ok or not l then warn("[Slashsaken] Obsidian failed"); return end
+    Lib=l
+    local ok2,t=pcall(function() return loadstring(game:HttpGet(repo.."addons/ThemeManager.lua"))() end)
+    if ok2 then TM=t end
+    local ok3,s=pcall(function() return loadstring(game:HttpGet(repo.."addons/SaveManager.lua"))() end)
+    if ok3 then SM=s end
+end
+local Opt=Lib.Options
+
+-- IDS (hardcoded, no fetch)
+local IDS={
+    punch={"87259391926321","99100240941590","72685103823181","81905101227053","113936304594883","140703210927645","136007065400978","129843313690921","86709774283672","108807732150251","138040001965654","86096387000557","119850211147676","131696603025265","119462383658044","116618003477002","133491532453922","76649505662612","71190646367497"},
+    block={"72722244508749","96959123077498","95802026624883","140671644163156","100926346851492"},
+    charge={"106014898538300"},
+    autoAnim={"114506382930939","127245564598429","99829427721752","138938529389204","111647315359080","92567970681901","124269076578545","94958041603347","109667959938617","130958529065375","118298475669935","126830014841198","18885909645","98456918873918","105458270463374","83829782357897","125403313786645","82113744478546","70371667919898","99135633258223","7167027849946","109230267448394","126996426760253","106538427162796","122709416391891","90620531468240","91509234639766","99824350842479","126171487400618","101101433684051","106860049270347","70483423693126","126727756047566","137642639873297","77375846492436","121293883585738","81639435858902","137314737492715","92173139187970","108196996477620","90819435118493","123172382755876"},
+    autoSound={"102228729296384","140242176732868","112809109188560","136323728355613","115026634746636","84116622032112","108907358619313","127793641088496","86174610237192","95079963655241","101199185291628","119942598489800","84307400688050","105200830849301","75330693422988","82221759983649","81702359653578","108610718831698","112395455254818","109431876587852","109348678063422","85853080745515","12222216","105840448036441","114742322778642","119583605486352","79980897195554","71805956520207","79391273191671","89004992452376","101553872555606","101698569375359","106300477136129","116581754553533","117231507259853","119089145505438","121954639447247","125213046326879","131406927389838","86833981571073","110372418055226","86494585504534","80516583309685","140412278320643","117173212095661","104910828105172","140194172008986","85544168523099","114506382930939","99829427721752","120059928759346","104625283622511","105316545074913","126131675979001","82336352305186","93366464803829","84069821282466","128856426573270","128195973631079","124903763333174","94317217837143","98111231282218","136728245733659","107444859834748","76959687420003","72425554233832","96594507550917","139996647355899","107345261604889","127557531826290","108651070773439","74842815979546","124397369810639","76467993976301","118493324723683","78298577002481","116527305931161","5148302439","98675142200448","128367348686124","103684883268194","109246041199659","80540530406270","139523195429581","105204810054381","116468089135195","133709029886490","124234993291213","98733709078792","99856718263455","74809026448465","99215225043220","79612713897495"},
+    guestParry={"72722244508749","96959123077498","95802026624883","140671644163156","100926346851492"},
+    parryIds={"116618003477002","111918351126361","108018357044094","83745199070305","133491532453922","90499469533503"},
+    parryKillers={johndoe=true,slasher=true},
+    parryAbilities={johndoe="404Error",slasher="RagingPace"},
+}
+
+-- SPRINT (safe)
+local sprint
+do local ok,m=pcall(function() return require(RS.Systems.Character.Game.Sprinting) end)
+   sprint=(ok and type(m)=="table") and m or {MaxStamina=100,SprintSpeed=24,StaminaGain=10,StaminaDrain=1,StaminaRegenDelay=0.5,Stamina=100}
+end
+
+-- STATE
+local S={
+    autoBlockOn=true, autoBlockAudioOn=false, blockdelay=0, range=18,
+    wallCheck=false, facingCheck=true, facingDot=0.3,
+    circlesVisible=false, facingVisOn=false,
+    msgOn=false, msgBlock="",
+    abToggle={Block=true,Charge=false,Clone=false},
+    hdtOn=false, hdtDebounce=false, Dspeed=8, Ddelay=0, HDT_DUR=1.5,
+    COMBO_CD=27, comboTime=0, comboActive=false,
+    animLockOn=false, AIM_WIN=0.8, predictionVal=4,
+    aimToggle={CharLock=false,CamLock=false}, autoPunch=false,
+    ragingPace=false,
+    flickOn=false, flickRange=15, flickDegSec=500, flickWin=0.25, flickData={},
+    lastM1=0, _lastM1Detect=0, M1_RECOVERY=0.4, m1Lockout=true,
+    kpOn=false, kpAnimIds={}, kpRange=15, kpDelay=0, kpCD=1.0,
+    kpLast=0, kpVis=true, kpVisual=nil,
+    kpSeen=setmetatable({},{__mode="k"}), kpStatus=0,
+    sAimOn=false, sAimMode="Camera", sAimSmooth=0.35, sAimPred="Both",
+    sAimVelLead=0.15, sAimPingMult=1.0, sAimDebug=false,
+    sStabOn=false, sStabBehind=1.7, sStabRange=60, sStabCD=0.5,
+    sStabTeleDelay=0.02, sStabFollow=0.5, sStabLast=0, sStabActive=false, sStabConn=nil, sStabOldAR=true,
+    espK=false, espS=false, espMed=false, espBloxy=false, espGen=false,
+    kHl={}, sHl={}, mHl={}, bHl={}, genConns={},
+    maxStam=sprint.MaxStamina, sprintSpeed=sprint.SprintSpeed,
+    stamGain=sprint.StaminaGain, stamDrain=sprint.StaminaDrain or 1,
+    regenDelay=sprint.StaminaRegenDelay or 0.5,
+    infStam=false, stamThread=nil,
+    lastBlock=0, LOCAL_CD=0.7,
+    _punchMsg=0, _blockMsg=0, MSG_CD=0.6, _punchPrev={}, _blockPrev={},
+    circleList={}, facingList={}, kState={}, soundHooks={}, soundBlocked={},
+    invisOn=false, invisThread=nil, invisCur=nil,
+    tracks={}, sound=nil, nameLoop=false, dispLoop=false,
+    tName="???", tDisp="???", eqTarget="Guest", eqSkin="",
+    emotePlay="", emoteList={}, killerList={}, survList={},
+}
+for _,id in ipairs(IDS.parryIds) do S.kpAnimIds[id]=true end
+for _,id in ipairs(IDS.guestParry) do S.kpAnimIds[id]=true end
+
+-- Populate spoofer lists
+pcall(function()
+    local A=RS:FindFirstChild("Assets"); if not A then return end
+    local em=A:FindFirstChild("Emotes")
+    if em then for _,m in ipairs(em:GetDescendants()) do if m:IsA("ModuleScript") then table.insert(S.emoteList,m.Name) end end end
+    local kf=A:FindFirstChild("Killers"); if kf then for _,k in ipairs(kf:GetChildren()) do table.insert(S.killerList,k.Name) end end
+    local sf=A:FindFirstChild("Survivors"); if sf then for _,s in ipairs(sf:GetChildren()) do table.insert(S.survList,s.Name) end end
+end)
+if #S.emoteList==0 then S.emoteList={"None"} end
+if #S.killerList==0 then S.killerList={"Guest"} end
+if #S.survList==0 then S.survList={"Guest"} end
+
+-- ═════════════════════════════════════════
+-- KEY FIX: BOTH H AND F DECLARED HERE
+-- ═════════════════════════════════════════
+local H={}
+local F={}
+
+-- Clean ability fire (no IIFE, no forward-reference bugs)
+local function fireAbility(name)
+    if not name or name=="" or not remote then return end
+    pcall(function()
+        local bytes={3,#name,0,0,0}
+        for i=1,#name do table.insert(bytes,string.byte(name,i)) end
+        local buf=buffer.create(#bytes)
+        for i=1,#bytes do buffer.writeu8(buf,i-1,bytes[i]) end
+        remote:FireServer("UseActorAbility",{buf})
+    end)
+end
+
+-- HELPERS
+function H.isHelpless()
+    local c=lp.Character; if not c then return true end
+    if c:GetAttribute("Helpless")==true or c:GetAttribute("Stunned")==true then return true end
+    if c:FindFirstChild("Helpless") or c:FindFirstChild("Stunned") then return true end
+    local se=c:FindFirstChild("StatusEffects")
+    if se and (se:FindFirstChild("Helpless") or se:FindFirstChild("Stunned")) then return true end
+    local st=c:FindFirstChild("Status")
+    if st and (st:FindFirstChild("Helpless") or st:FindFirstChild("Stunned")) then return true end
+    local h=c:FindFirstChildOfClass("Humanoid")
+    if h and (h:GetAttribute("Helpless")==true or h.Health<=0) then return true end
+    return false
+end
+function H.m1Locked()
+    if not S.m1Lockout or S.lastM1==0 then return false end
+    return (tick()-S.lastM1)<S.M1_RECOVERY
+end
+function H.killers()
+    local p=WS:FindFirstChild("Players")
+    return p and p:FindFirstChild("Killers")
+end
+function H.nearest()
+    local mr=lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
+    if not mr then return nil end
+    local f=H.killers(); if not f then return nil end
+    local best,bd=nil,math.huge
+    for _,k in ipairs(f:GetChildren()) do
+        local hrp=k:FindFirstChild("HumanoidRootPart")
+        if hrp then
+            local d=(hrp.Position-mr.Position).Magnitude
+            if d<bd then best=k; bd=d end
+        end
+    end
+    return best
+end
+function H.khrp(m)
+    if not m then return nil end
+    return m:FindFirstChild("HumanoidRootPart") or m.PrimaryPart or m:FindFirstChildWhichIsA("BasePart",true)
+end
+function H.myKiller()
+    local p=WS:FindFirstChild("Players"); if not p then return nil end
+    local k=p:FindFirstChild("Killers"); if not k then return nil end
+    for _,m in ipairs(k:GetChildren()) do
+        if m:IsA("Model") and Players:GetPlayerFromCharacter(m)==lp then return m.Name end
+    end
+    return nil
+end
+function H.isSupported(n) return n and IDS.parryKillers[n:lower()] or false end
+function H.abilityFor(n) return n and IDS.parryAbilities[n:lower()] end
+function H.others()
+    local list={}
+    local p=WS:FindFirstChild("Players"); if not p then return list end
+    for _,fn in ipairs({"Survivors","Killers"}) do
+        local f=p:FindFirstChild(fn)
+        if f then
+            for _,m in ipairs(f:GetChildren()) do
+                if m:IsA("Model") and m~=lp.Character then table.insert(list,m) end
+            end
+        end
+    end
+    return list
+end
+function H.updateKP(str)
+    S.kpAnimIds={}
+    for id in tostring(str or ""):gmatch("%d+") do S.kpAnimIds[id]=true end
+    for _,id in ipairs(IDS.guestParry) do S.kpAnimIds[id]=true end
+end
+function H.facing(hrp)
+    local dot=math.clamp(S.facingDot or 0.3,-1,1)
+    local a=math.acos(dot); local fr=a/math.pi
+    local r=math.max(1,S.range*(0.20+0.80*fr))
+    local fd=S.range*(0.35+0.15*fr)
+    return hrp.Position+hrp.CFrame.LookVector*fd,r
+end
+function H.inZone(mr,kr)
+    if not S.facingCheck then return (mr.Position-kr.Position).Magnitude<=S.range end
+    local c,r=H.facing(kr)
+    return (mr.Position-c).Magnitude<=r
+end
+function H.flicking(k,mr,kr)
+    if not S.flickOn then return false end
+    if (kr.Position-mr.Position).Magnitude>S.flickRange then return false end
+    local fd=S.flickData[k]; if not fd then return false end
+    return (tick()-fd.lastFlickTick)<S.flickWin
+end
+function H.los(tp)
+    if not S.wallCheck then return true end
+    local c=lp.Character; local mr=c and c:FindFirstChild("HumanoidRootPart")
+    if not mr or not tp then return true end
+    local rp=RaycastParams.new()
+    rp.FilterType=Enum.RaycastFilterType.Exclude
+    local ex={c}; local km=tp:FindFirstAncestorOfClass("Model")
+    if km then table.insert(ex,km) end
+    rp.FilterDescendantsInstances=ex; rp.IgnoreWater=true
+    return WS:Raycast(mr.Position,tp.Position-mr.Position,rp)==nil
+end
+function H.fireBlock()
+    if H.isHelpless() then return end
+    if S.hdtOn and S.comboActive and (tick()-S.comboTime)<S.COMBO_CD then return end
+    fireAbility("Block")
+    if S.hdtOn then
+        S.comboActive=true; S.comboTime=tick()
+        pcall(function() Lib:Notify({Title="Cooldown",Description="Block+HDT 27s",Time=3}) end)
+        task.spawn(function()
+            local n=H.nearest()
+            if n then F.beginDrag(n) end
+        end)
+    end
+end
+function H.fireCharge() if not H.isHelpless() then fireAbility("Slash") end end
+function H.fireClone() if not H.isHelpless() then fireAbility("Clone") end end
+function H.fireRaging() fireAbility("RagingPace") end
+function H.msg(t)
+    if t and t:match("%S") then
+        pcall(function() TCS.TextChannels.RBXGeneral:SendAsync(t) end)
+    end
+end
+
+-- FEATURES
+function F.beginDrag(km)
+    if S.hdtDebounce or not km or not km.Parent then return end
+    local c=lp.Character; if not c then return end
+    local hrp=c:FindFirstChild("HumanoidRootPart")
+    local hum=c:FindFirstChildOfClass("Humanoid")
+    if not hrp or not hum then return end
+    if not H.khrp(km) then return end
+    S.hdtDebounce=true
+    local oldAR=hum.AutoRotate
+    pcall(function() hum.AutoRotate=false end)
+    local bv=Instance.new("BodyVelocity")
+    bv.MaxForce=Vector3.new(8e4,0,8e4); bv.Velocity=Vector3.new(); bv.Parent=hrp
+    local bg=Instance.new("BodyGyro")
+    bg.MaxTorque=Vector3.new(4e5,4e5,4e5); bg.D=100; bg.P=3000; bg.Parent=hrp
+    local spd=S.Dspeed or 8
+    local conn
+    conn=Run.Heartbeat:Connect(function()
+        if not S.hdtDebounce then
+            conn:Disconnect()
+            if bv.Parent then pcall(function() bv:Destroy() end) end
+            if bg.Parent then pcall(function() bg:Destroy() end) end
+            pcall(function() hum.AutoRotate=oldAR end)
+            return
+        end
+        if not (c and c.Parent) or not (km and km.Parent) then S.hdtDebounce=false; return end
+        local t=H.khrp(km); if not t then S.hdtDebounce=false; return end
+        pcall(function() bg.CFrame=CFrame.lookAt(hrp.Position,Vector3.new(t.Position.X,hrp.Position.Y,t.Position.Z)) end)
+        local toT=t.Position-hrp.Position
+        local hor=Vector3.new(toT.X,0,toT.Z)
+        if hor.Magnitude<=2 then S.hdtDebounce=false; return end
+        local dir=hor.Unit
+        bv.Velocity=Vector3.new(dir.X*spd,bv.Velocity.Y,dir.Z*spd)
+    end)
+    task.delay(S.HDT_DUR,function() S.hdtDebounce=false end)
+end
+function F.isSurv()
+    local c=lp.Character; if not c then return false end
+    local p=c.Parent; return p and p.Name=="Survivors"
+end
+function F.nearestKHRP(maxD)
+    local mr=lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
+    if not mr then return nil end
+    local f=H.killers(); if not f then return nil end
+    local best,bd=nil,maxD or 500
+    for _,k in ipairs(f:GetChildren()) do
+        if k:IsA("Model") then
+            local hrp=k:FindFirstChild("HumanoidRootPart")
+            local h=k:FindFirstChildOfClass("Humanoid")
+            if hrp and h and h.Health>0 then
+                local d=(hrp.Position-mr.Position).Magnitude
+                if d<bd then best=hrp; bd=d end
+            end
+        end
+    end
+    return best,bd
+end
+function F.triggerStab()
+    if not S.sStabOn or S.sStabActive then return end
+    if tick()-S.sStabLast<S.sStabCD then return end
+    local mr=lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
+    if not mr then return end
+    local kr=F.nearestKHRP(S.sStabRange); if not kr then return end
+    local killer=kr.Parent
+    S.sStabActive=true; S.sStabLast=tick()
+    local kcf=kr.CFrame
+    local bp=kcf.Position-kcf.LookVector*S.sStabBehind
+    local origin=mr.CFrame
+    local behind=CFrame.lookAt(Vector3.new(bp.X,origin.Position.Y,bp.Z),Vector3.new(kcf.Position.X,origin.Position.Y,kcf.Position.Z))
+    if S.sStabTeleDelay>0 then task.wait(S.sStabTeleDelay) end
+    local cur=lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
+    if not cur then S.sStabActive=false; return end
+    cur.CFrame=behind
+    pcall(function() cur.AssemblyLinearVelocity=Vector3.new() end)
+    if S.sStabConn then pcall(function() S.sStabConn:Disconnect() end) end
+    local hum=lp.Character and lp.Character:FindFirstChildOfClass("Humanoid")
+    S.sStabOldAR=hum and hum.AutoRotate or true
+    if hum then hum.AutoRotate=false end
+    local endT=tick()+S.sStabFollow
+    S.sStabConn=Run.RenderStepped:Connect(function()
+        if tick()>=endT or not S.sStabActive then
+            if S.sStabConn then pcall(function() S.sStabConn:Disconnect() end); S.sStabConn=nil end
+            if hum then hum.AutoRotate=S.sStabOldAR end
+            S.sStabActive=false; return
+        end
+        local ch=lp.Character; local m2=ch and ch:FindFirstChild("HumanoidRootPart")
+        if not m2 then S.sStabActive=false; return end
+        local k2=killer and killer:FindFirstChild("HumanoidRootPart")
+        if not k2 or not k2.Parent then S.sStabActive=false; return end
+        local c2=k2.CFrame
+        local b2=c2.Position-c2.LookVector*S.sStabBehind
+        local tcf=CFrame.lookAt(Vector3.new(b2.X,m2.Position.Y,b2.Z),Vector3.new(c2.Position.X,m2.Position.Y,c2.Position.Z))
+        m2.CFrame=m2.CFrame:Lerp(tcf,0.5)
+        pcall(function() m2.AssemblyLinearVelocity=Vector3.new() end)
+    end)
+end
+function F.addFacingV(k)
+    if not k or not k:IsA("Model") or S.facingList[k] then return end
+    local hrp=k:FindFirstChild("HumanoidRootPart"); if not hrp then return end
+    local v=Instance.new("CylinderHandleAdornment")
+    v.Name="FacingVis"; v.Adornee=hrp; v.AlwaysOnTop=true
+    v.ZIndex=2; v.Transparency=0.5; v.Color3=Color3.fromRGB(255,255,0); v.Parent=hrp
+    S.facingList[k]=v
+end
+function F.removeFacingV(k)
+    local v=S.facingList[k]; if v then v:Destroy(); S.facingList[k]=nil end
+end
+function F.addCircle(k)
+    local hrp=k and k:FindFirstChild("HumanoidRootPart")
+    if not hrp or S.circleList[k] then return end
+    local c=Instance.new("CylinderHandleAdornment")
+    c.Name="KillerCircle"; c.Adornee=hrp; c.Color3=Color3.fromRGB(255,255,0)
+    c.AlwaysOnTop=true; c.ZIndex=1; c.Transparency=0.6
+    c.Radius=S.range; c.Height=0.12
+    c.CFrame=CFrame.new(0,-(hrp.Size.Y/2+0.05),0)*CFrame.Angles(math.rad(90),0,0)
+    c.Parent=hrp; S.circleList[k]=c
+end
+function F.removeCircle(k)
+    if S.circleList[k] then S.circleList[k]:Destroy(); S.circleList[k]=nil end
+end
+function F.clearHl(list)
+    for _,h in ipairs(list) do if h and h.Parent then h:Destroy() end end
+    return {}
+end
+function F.hl(m,col,list)
+    if not m or not m:FindFirstChild("HumanoidRootPart") then return end
+    local h=Instance.new("Highlight")
+    h.Adornee=m; h.FillColor=col; h.OutlineColor=col
+    h.FillTransparency=0.65; h.OutlineTransparency=0
+    h.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop
+    h.Parent=m; table.insert(list,h)
+end
+function F.itemHl(item)
+    if not (item:IsA("BasePart") or item:IsA("Model")) then return end
+    local n=item.Name
+    local isM=(n=="Medkit" and S.espMed)
+    local isB=(n=="BloxyCola" and S.espBloxy)
+    if not (isM or isB) then return end
+    local t=item:IsA("BasePart") and item or item:FindFirstChildWhichIsA("BasePart")
+    if not t or t:FindFirstChild("ItemHighlight") then return end
+    local h=Instance.new("Highlight")
+    h.Name="ItemHighlight"; h.Adornee=item
+    h.FillTransparency=0.5; h.OutlineTransparency=0
+    h.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop
+    if isM then h.FillColor=Color3.fromRGB(255,105,180); h.OutlineColor=h.FillColor
+    else h.FillColor=Color3.fromRGB(0,150,255); h.OutlineColor=h.FillColor end
+    h.Parent=t
+end
+function F.scanItems(name)
+    for _,item in ipairs(WS:GetDescendants()) do
+        if item.Name==name then F.itemHl(item) end
+    end
+end
+function F.attachGen(obj)
+    if not obj or not obj.Parent then return end
+    local root=obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
+    if not root then return end
+    local h=Instance.new("Highlight")
+    h.Name="esp_g"; h.FillColor=Color3.fromRGB(255,255,0); h.OutlineColor=h.FillColor
+    h.FillTransparency=0.6; h.OutlineTransparency=0
+    h.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop
+    h.Adornee=obj; h.Parent=obj
+    local bb=Instance.new("BillboardGui")
+    bb.Name="esp_g_bb"; bb.Adornee=root
+    bb.Size=UDim2.new(0,100,0,20); bb.StudsOffset=Vector3.new(0,3.8,0)
+    bb.AlwaysOnTop=true; bb.Parent=obj
+    local lbl=Instance.new("TextLabel")
+    lbl.Size=UDim2.new(1,0,1,0); lbl.BackgroundTransparency=1
+    lbl.TextColor3=Color3.fromRGB(255,255,0); lbl.TextStrokeTransparency=0.5
+    lbl.TextSize=15; lbl.Font=Enum.Font.SourceSansBold; lbl.Parent=bb
+    local p=obj:FindFirstChild("Progress")
+    if p and p:IsA("NumberValue") then
+        lbl.Text="Generator ("..math.floor(p.Value).."%)"
+        S.genConns[obj]=p.Changed:Connect(function()
+            if lbl.Parent then lbl.Text="Generator ("..math.floor(p.Value).."%)" end
+        end)
+    end
+end
+function F.doGens(on)
+    for _,obj in ipairs(WS:GetDescendants()) do
+        if obj.Name=="Generator" then
+            if on then F.attachGen(obj)
+            else
+                local h=obj:FindFirstChild("esp_g"); if h then h:Destroy() end
+                local b=obj:FindFirstChild("esp_g_bb"); if b then b:Destroy() end
+                if S.genConns[obj] then S.genConns[obj]:Disconnect(); S.genConns[obj]=nil end
+            end
+        end
+    end
+end
+function F.startInvis()
+    S.invisOn=true
+    local h=lp.Character and lp.Character:FindFirstChildOfClass("Humanoid")
+    if not h or h.RigType~=Enum.HumanoidRigType.R6 then return end
+    S.invisThread=task.spawn(function()
+        while S.invisOn do
+            local a=Instance.new("Animation"); a.AnimationId="rbxassetid://75804462760596"
+            local t=h:LoadAnimation(a); S.invisCur=t
+            t.Looped=false; t:Play(); t:AdjustSpeed(0); task.wait()
+        end
+    end)
+end
+function F.stopInvis()
+    S.invisOn=false
+    if S.invisThread then task.cancel(S.invisThread); S.invisThread=nil end
+    if S.invisCur then S.invisCur:Stop(); S.invisCur=nil end
+end
+function F.infStam()
+    S.infStam=true
+    if S.stamThread then task.cancel(S.stamThread) end
+    S.stamThread=task.spawn(function()
+        while S.infStam do
+            task.wait(0.005)
+            sprint.MaxStamina=S.maxStam; sprint.SprintSpeed=S.sprintSpeed
+            sprint.StaminaGain=S.stamGain; sprint.StaminaDrain=S.stamDrain
+            sprint.StaminaRegenDelay=S.regenDelay; sprint.Stamina=sprint.MaxStamina
+        end
+    end)
+end
+
+-- SOUND HOOK
+local soundTrigger={}
+for _,id in ipairs(IDS.autoSound) do soundTrigger[id]=true end
+local function extractSoundId(s)
+    if not s or not s.SoundId then return nil end
+    local sid=tostring(s.SoundId)
+    return sid:match("rbxassetid://(%d+)") or sid:match("://(%d+)") or sid:match("^(%d+)$")
+end
+local function trySound(s,idp,mode)
+    if not S.autoBlockAudioOn or H.isHelpless() or H.m1Locked() then return end
+    if not s or not s:IsA("Sound") or not s.IsPlaying then return end
+    local now=tick()
+    local hk=S.soundHooks[s]
+    local id=idp or (hk and hk.id) or extractSoundId(s)
+    if not id or not soundTrigger[id] then return end
+    if S.soundBlocked[s] and now<S.soundBlocked[s] then return end
+    if now-S.lastBlock<S.LOCAL_CD then return end
+    local mr=lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
+    if not mr then return end
+    local hrp=hk and hk.hrp
+    if not hrp then
+        local p=s.Parent
+        if p and p:IsA("BasePart") then hrp=p
+        elseif p and p:IsA("Attachment") and p.Parent and p.Parent:IsA("BasePart") then hrp=p.Parent end
+        if not hrp then return end
+    end
+    if not H.inZone(mr,hrp) or not H.los(hrp) then return end
+    local km=hrp.Parent
+    if km and H.flicking(km,mr,hrp) then return end
+    if S.blockdelay>0 then task.wait(S.blockdelay) end
+    if mode=="Block" and S.abToggle.Block then H.fireBlock() end
+    if mode=="Charge" and S.abToggle.Charge then H.fireCharge() end
+    if mode=="Clone" and S.abToggle.Clone then H.fireClone() end
+    S.lastBlock=now; S.soundBlocked[s]=now+1.0
+end
+local function hookSound(s)
+    if not s or not s:IsA("Sound") or S.soundHooks[s] then return end
+    local pre=extractSoundId(s); S.soundHooks[s]={id=pre}
+    local function fire()
+        if S.abToggle.Block then trySound(s,pre,"Block") end
+        if S.abToggle.Charge then trySound(s,pre,"Charge") end
+        if S.abToggle.Clone then trySound(s,pre,"Clone") end
+    end
+    s.Played:Connect(fire)
+    s:GetPropertyChangedSignal("IsPlaying"):Connect(function() if s.IsPlaying then fire() end end)
+    if s.IsPlaying then fire() end
+end
+
+-- WINDOW + TABS
+local Win=Lib:CreateWindow({Title="Slashsaken [Beta]",Footer="By viltrumite",NotifySide="Right",ShowCustomCursor=true,AutoShow=false})
+local T={
+    Notice=Win:AddTab("Notice","info"),
+    Esp=Win:AddTab("Esp","monitor"),
+    Stam=Win:AddTab("Stam","zap"),
+    AutoBlock=Win:AddTab("Auto Block","shield"),
+    Facing=Win:AddTab("Facing Check","eye"),
+    AutoPunch=Win:AddTab("Auto Punch","sword"),
+    Survivor=Win:AddTab("Survivor","user-check"),
+    Gen=Win:AddTab("Gen","settings"),
+    Tech=Win:AddTab("Tech","cpu"),
+    Killer=Win:AddTab("Killer","skull"),
+    Spoofer=Win:AddTab("Spoofer","user-x"),
+    Misc=Win:AddTab("Misc","box"),
+    UISettings=Win:AddTab("UI Settings","settings"),
+}
+
+-- NOTICE
+T:Notice():AddGroupbox({Side="Left",Name="Info",IconName="info"}):AddLabel({
+    Text="Slashsaken [Beta] — By viltrumite\n\nBugs fixed:\n- F/H forward reference\n- M1 lockout variable typo\n- Clean ability fire helper\n- All pcall-guarded",DoesWrap=true})
+
+-- ESP
+local VL=T.Esp:AddGroupbox({Side="Left",Name="Players",IconName="users"})
+VL:AddToggle("EK",{Text="Killer ESP",Default=false,Callback=function(v) S.espK=v end})
+VL:AddToggle("ES",{Text="Survivors ESP",Default=false,Callback=function(v) S.espS=v end})
+local VR=T.Esp:AddGroupbox({Side="Right",Name="Items",IconName="package"})
+VR:AddToggle("EM",{Text="Medkit ESP",Default=false,Callback=function(v) S.espMed=v; if v then F.scanItems("Medkit") end end})
+VR:AddToggle("EB",{Text="BloxyCola ESP",Default=false,Callback=function(v) S.espBloxy=v; if v then F.scanItems("BloxyCola") end end})
+VR:AddToggle("EG",{Text="Generators ESP",Default=false,Callback=function(v) S.espGen=v; F.doGens(v) end})
+
+-- STAM
+local SL=T.Stam:AddGroupbox({Side="Left",Name="Stamina",IconName="zap"})
+SL:AddToggle("Inf",{Text="Infinite Stamina",Default=false,Callback=function(v)
+    if v then F.infStam() else S.infStam=false; if S.stamThread then task.cancel(S.stamThread); S.stamThread=nil end end
+end})
+SL:AddSlider("MS",{Text="Max Stamina",Default=S.maxStam,Min=1,Max=1000,Rounding=0,Callback=function(v) S.maxStam=v; sprint.MaxStamina=v end})
+SL:AddSlider("SpS",{Text="Sprint Speed",Default=S.sprintSpeed,Min=1,Max=30,Rounding=0,Callback=function(v) S.sprintSpeed=v; sprint.SprintSpeed=v end})
+local SR=T.Stam:AddGroupbox({Side="Right",Name="Advanced",IconName="activity"})
+SR:AddSlider("SG",{Text="Stamina Gain",Default=S.stamGain,Min=1,Max=1000,Rounding=0,Callback=function(v) S.stamGain=v; sprint.StaminaGain=v end})
+SR:AddSlider("SD",{Text="Stamina Drain",Default=S.stamDrain,Min=0,Max=1000,Rounding=0,Callback=function(v) S.stamDrain=v; sprint.StaminaDrain=v end})
+SR:AddSlider("RD",{Text="Regen Delay",Default=S.regenDelay,Min=0,Max=10,Rounding=1,Callback=function(v) S.regenDelay=v; sprint.StaminaRegenDelay=v end})
+
+-- AUTO BLOCK
+local ABL=T.AutoBlock:AddGroupbox({Side="Left",Name="Auto Block",IconName="shield"})
+ABL:AddToggle("AB",{Text="Auto Block",Default=true,Callback=function(v) S.autoBlockOn=v end})
+ABL:AddToggle("AA",{Text="Auto Block (Sound React)",Default=false,Callback=function(v) S.autoBlockAudioOn=v end})
+ABL:AddToggle("AG",{Text="Ghost Block",Default=false,Callback=function(v) if v then F.startInvis() else F.stopInvis() end end})
+ABL:AddInput("AR",{Text="Detection Range",Default="18",Numeric=true,ClearTextOnFocus=false,Callback=function(v) S.range=tonumber(v) or 18 end})
+ABL:AddInput("AD",{Text="Block Delay (0=instant)",Default="0",Numeric=true,ClearTextOnFocus=false,Callback=function(v) S.blockdelay=tonumber(v) or 0 end})
+ABL:AddDivider()
+ABL:AddToggle("ML",{Text="M1 Recovery Lockout",Default=true,Callback=function(v) S.m1Lockout=v end})
+ABL:AddInput("MD",{Text="M1 Recovery (s)",Default="0.4",Numeric=true,ClearTextOnFocus=false,Callback=function(v) S.M1_RECOVERY=tonumber(v) or 0.4 end})
+local ABR=T.AutoBlock:AddGroupbox({Side="Right",Name="Modes",IconName="shield-check"})
+ABR:AddToggle("BM",{Text="Auto Block (Guest)",Default=true,Callback=function(v) S.abToggle.Block=v end})
+ABR:AddToggle("CM",{Text="Auto Clone (007n7)",Default=false,Callback=function(v) S.abToggle.Clone=v end})
+
+-- FACING
+local FCL=T.Facing:AddGroupbox({Side="Left",Name="Facing",IconName="eye"})
+FCL:AddToggle("FC",{Text="Facing Check",Default=true,Callback=function(v)
+    S.facingCheck=v
+    if v then local f=H.killers(); if f then for _,k in ipairs(f:GetChildren()) do F.addFacingV(k) end end end
+end})
+FCL:AddToggle("FV",{Text="Facing Visual",Default=true,Callback=function(v)
+    S.facingVisOn=v
+    local f=H.killers(); if f then for _,k in ipairs(f:GetChildren()) do
+        if v then F.addFacingV(k) else F.removeFacingV(k) end
+    end end
+end})
+FCL:AddToggle("CV",{Text="Giant Circle Visual",Default=false,Callback=function(v)
+    S.circlesVisible=v
+    local f=H.killers(); if f then for _,k in ipairs(f:GetChildren()) do
+        if v then F.addCircle(k) else F.removeCircle(k) end
+    end end
+end})
+FCL:AddInput("FD",{Text="Facing DOT (0.3=72°)",Default="0.3",Numeric=true,ClearTextOnFocus=false,Callback=function(v) S.facingDot=tonumber(v) or 0.3 end})
+FCL:AddToggle("WC",{Text="Wall Check",Default=false,Callback=function(v) S.wallCheck=v end})
+local FCR=T.Facing:AddGroupbox({Side="Right",Name="Flick Protection",IconName="wind"})
+FCR:AddToggle("FP",{Text="Enable Flick Protection",Default=false,Callback=function(v) S.flickOn=v end})
+FCR:AddInput("FR",{Text="Flick Range",Default="15",Numeric=true,ClearTextOnFocus=false,Callback=function(v) S.flickRange=tonumber(v) or 15 end})
+FCR:AddInput("FT",{Text="Flick Threshold (deg/s)",Default="500",Numeric=true,ClearTextOnFocus=false,Callback=function(v) S.flickDegSec=tonumber(v) or 500 end})
+FCR:AddInput("FW",{Text="Flick Window (s)",Default="0.25",Numeric=true,ClearTextOnFocus=false,Callback=function(v) S.flickWin=tonumber(v) or 0.25 end})
+
+-- AUTO PUNCH
+local APL=T.AutoPunch:AddGroupbox({Side="Left",Name="Auto Punch",IconName="sword"})
+APL:AddToggle("AP",{Text="Auto Punch",Default=false,Callback=function(v) S.autoPunch=v end})
+APL:AddToggle("AAim",{Text="Aimbot",Default=false,Callback=function(v) S.animLockOn=v end})
+APL:AddInput("ADur",{Text="Aim Lock Duration",Default="0.8",Numeric=true,ClearTextOnFocus=false,Callback=function(v) S.AIM_WIN=tonumber(v) or 0.8 end})
+local APR=T.AutoPunch:AddGroupbox({Side="Right",Name="Aim Lock Modes",IconName="target"})
+APR:AddToggle("AC",{Text="Character Lock",Default=true,Callback=function(v) S.aimToggle.CharLock=v end})
+APR:AddToggle("ACam",{Text="Camera Lock",Default=false,Callback=function(v) S.aimToggle.CamLock=v end})
+
+-- SURVIVOR
+local SAL=T.Survivor:AddGroupbox({Side="Left",Name="Auto Aim",IconName="target"})
+SAL:AddToggle("SA",{Text="Auto Aim",Default=false,Callback=function(v) S.sAimOn=v end})
+SAL:AddDropdown("SM",{Values={"Camera","HRP","HRP+Camera"},Default="Camera",Text="Aim Mode",Callback=function(v) S.sAimMode=v end})
+SAL:AddSlider("SSm",{Text="Smoothness",Default=0.35,Min=0.05,Max=1,Rounding=2,Callback=function(v) S.sAimSmooth=v end})
+SAL:AddDropdown("SP",{Values={"Off","Ping","Velocity","Both"},Default="Both",Text="Prediction",Callback=function(v) S.sAimPred=v end})
+SAL:AddSlider("SV",{Text="Velocity Lead (s)",Default=0.15,Min=0,Max=0.5,Rounding=2,Callback=function(v) S.sAimVelLead=v end})
+SAL:AddToggle("SDbg",{Text="Debug",Default=false,Callback=function(v) S.sAimDebug=v end})
+local SAR=T.Survivor:AddGroupbox({Side="Right",Name="Auto Stab (Two Time)",IconName="sword"})
+SAR:AddToggle("SS",{Text="Auto Stab",Default=false,Callback=function(v) S.sStabOn=v end})
+SAR:AddSlider("Sb",{Text="Behind Offset (studs)",Default=1.7,Min=0.5,Max=6,Rounding=1,Callback=function(v) S.sStabBehind=v end})
+SAR:AddSlider("Sr",{Text="Max Range (studs)",Default=60,Min=10,Max=150,Rounding=0,Callback=function(v) S.sStabRange=v end})
+SAR:AddSlider("Sc",{Text="Cooldown (s)",Default=0.5,Min=0.1,Max=2,Rounding=2,Callback=function(v) S.sStabCD=v end})
+SAR:AddButton({Text="Test Stab Now",Func=function() if S.sStabOn then F.triggerStab() end end})
+
+-- GEN
+T.Gen:AddGroupbox({Side="Left",Name="Generator",IconName="settings"}):AddButton({
+    Text="Generator Button",Func=function() pcall(function() loadstring(game:HttpGet("https://pastebin.com/raw/tPWnvGj6"))() end) end})
+
+-- TECH
+local TL=T.Tech:AddGroupbox({Side="Left",Name="HDT",IconName="cpu"})
+TL:AddToggle("HDT",{Text="HDT (walk into killer)",Default=false,Callback=function(v) S.hdtOn=v end})
+TL:AddSlider("HDTd",{Text="HDT Duration",Default=1.5,Min=0.1,Max=5,Rounding=1,Suffix="s",Callback=function(v) S.HDT_DUR=tonumber(v) or 1.5 end})
+TL:AddInput("HDTs",{Text="Walk speed",Default="8",Numeric=true,ClearTextOnFocus=false,Callback=function(v) S.Dspeed=tonumber(v) or 8 end})
+TL:AddInput("HDTdel",{Text="Delay before walk",Default="0",Numeric=true,ClearTextOnFocus=false,Callback=function(v) S.Ddelay=tonumber(v) or 0 end})
+TL:AddLabel("HDTcd",{Text="Cooldown: Ready",DoesWrap=false})
+task.spawn(function()
+    while true do
+        task.wait(0.5)
+        if S.comboActive then
+            local r=S.COMBO_CD-(tick()-S.comboTime)
+            if r>0 then pcall(function() Opt.HDTcd:SetText(string.format("Cooldown: %.1fs",r)) end)
+            else S.comboActive=false; pcall(function() Opt.HDTcd:SetText("Cooldown: Ready") end) end
+        else pcall(function() Opt.HDTcd:SetText("Cooldown: Ready") end) end
+    end
+end)
+local TR2=T.Tech:AddGroupbox({Side="Right",Name="Exploits",IconName="terminal"})
+TR2:AddButton({Text="Fake Lag Tech",Func=function()
+    pcall(function()
+        local c=lp.Character or lp.CharacterAdded:Wait()
+        local h=c and c:FindFirstChildOfClass("Humanoid"); if not h then return end
+        local a=h:FindFirstChildOfClass("Animator") or Instance.new("Animator",h)
+        local an=Instance.new("Animation"); an.AnimationId="rbxassetid://136252471123500"
+        a:LoadAnimation(an):Play()
+    end)
+end})
+
+-- KILLER
+local KA=T.Killer:AddGroupbox({Side="Left",Name="Abilities",IconName="skull"})
+KA:AddToggle("RP",{Text="Auto Raging Pace [Beta]",Default=false,Callback=function(v) S.ragingPace=v end})
+local KP=T.Killer:AddGroupbox({Side="Right",Name="Killer Auto-Parry",IconName="shield-alert"})
+KP:AddToggle("KPOn",{Text="Killer Auto-Parry (JohnDoe/Slasher)",Default=false,Callback=function(v) S.kpOn=v end})
+KP:AddInput("KPIds",{Text="Extra Parry Anim IDs",Default=table.concat(IDS.parryIds,","),ClearTextOnFocus=false,Callback=function(v) H.updateKP(v) end})
+KP:AddInput("KPR",{Text="Circle Range",Default="15",Numeric=true,ClearTextOnFocus=false,Callback=function(v) S.kpRange=tonumber(v) or 15 end})
+KP:AddInput("KPCD",{Text="Cooldown (s)",Default="1",Numeric=true,ClearTextOnFocus=false,Callback=function(v) S.kpCD=tonumber(v) or 1 end})
+KP:AddLabel("KPStat",{Text="Status: Standby",DoesWrap=false})
+KP:AddLabel("KPLast",{Text="Last: None",DoesWrap=false})
+
+-- SPOOFER
+local SB1=T.Spoofer:AddGroupbox({Side="Left",Name="Unlock All",IconName="unlock"})
+SB1:AddButton({Text="Unlock All (killers + survivors + skins)",Func=function()
+    pcall(function()
+        local data=lp:FindFirstChild("PlayerData")
+        local pur=data and data:FindFirstChild("Purchased")
+        if not pur then return end
+        local count=0
+        for _,name in ipairs(S.killerList) do
+            if name~="Guest" and not pur.Killers:FindFirstChild(name) then
+                Instance.new("StringValue",pur.Killers).Name=name; count=count+1
+            end
+        end
+        for _,name in ipairs(S.survList) do
+            if name~="Guest" and not pur.Survivors:FindFirstChild(name) then
+                Instance.new("StringValue",pur.Survivors).Name=name; count=count+1
+            end
+        end
+        local A=RS:FindFirstChild("Assets"); local SR3=A and A:FindFirstChild("Skins")
+        if SR3 then
+            for _,skin in ipairs(SR3:GetDescendants()) do
+                if (skin:IsA("Folder") or skin:IsA("Model")) and not pur.Skins:FindFirstChild(skin.Name) then
+                    Instance.new("StringValue",pur.Skins).Name=skin.Name; count=count+1
+                end
+            end
+        end
+        Lib:Notify({Title="Spoofer",Description="Unlocked "..count.." items!",Time=3})
+    end)
+end})
+
+local SB2=T.Spoofer:AddGroupbox({Side="Left",Name="Skin Equip",IconName="shirt"})
+local dropdownVals={}
+for _,v in ipairs(S.killerList) do table.insert(dropdownVals,v) end
+for _,v in ipairs(S.survList) do table.insert(dropdownVals,v) end
+if #dropdownVals==0 then table.insert(dropdownVals,"Guest") end
+SB2:AddDropdown("SPChar",{Values=dropdownVals,Default="Guest",Text="Character",Callback=function(v) S.eqTarget=v end})
+SB2:AddInput("SPSkin",{Text="Skin Name",Default="",Placeholder="e.g. Milestone100Guest1337",ClearTextOnFocus=false,Callback=function(v) S.eqSkin=v end})
+SB2:AddButton({Text="Force Equip Skin",Func=function()
+    pcall(function()
+        local data=lp:FindFirstChild("PlayerData")
+        local eq=data and data:FindFirstChild("Equipped")
+        local skins=eq and eq:FindFirstChild("Skins"); if not skins then return end
+        if skins:FindFirstChild(S.eqTarget) then skins:FindFirstChild(S.eqTarget):Destroy() end
+        task.wait(0.1)
+        local val=Instance.new("StringValue")
+        val.Name=S.eqTarget; val.Value=S.eqSkin
+        val:SetAttribute("Skin",S.eqSkin); val:SetAttribute("UniqueId","00000000-0000-0000-0000-000000000000")
+        val.Parent=skins
+        Lib:Notify({Title="Success",Description="Injected: "..S.eqSkin,Time=2})
+    end)
+end})
+
+local SB3=T.Spoofer:AddGroupbox({Side="Right",Name="Emotes",IconName="smile"})
+SB3:AddButton({Text="Unlock Every Emote",Func=function()
+    pcall(function()
+        local data=lp:FindFirstChild("PlayerData")
+        local pur=data and data:FindFirstChild("Purchased")
+        local em=pur and pur:FindFirstChild("Emotes"); if not em then return end
+        local count=0
+        for _,name in ipairs(S.emoteList) do
+            if name~="None" and not em:FindFirstChild(name) then
+                Instance.new("StringValue",em).Name=name; count=count+1
+            end
+        end
+        Lib:Notify({Title="Spoofer",Description="Unlocked "..count.." emotes",Time=3})
+    end)
+end})
+SB3:AddDropdown("SPEm",{Values=S.emoteList,Default="None",Text="Select Emote",Callback=function(v) S.emotePlay=v end})
+SB3:AddButton({Text="Play Selected",Func=function()
+    local name=S.emotePlay
+    if not name or name=="" or name=="None" then return end
+    pcall(function()
+        local A=RS:FindFirstChild("Assets")
+        local emRoot=A and A:FindFirstChild("Emotes")
+        local mod=emRoot and emRoot:FindFirstChild(name,true)
+        if not mod or not mod:IsA("ModuleScript") then return end
+        local data=require(mod)
+        for _,tr in ipairs(S.tracks) do pcall(function() tr:Stop() end) end
+        for i=#S.tracks,1,-1 do S.tracks[i]=nil end
+        if S.sound then pcall(function() S.sound:Stop(); S.sound:Destroy() end); S.sound=nil end
+        local char=lp.Character or lp.CharacterAdded:Wait()
+        if not char:FindFirstChild("Humanoid") then return end
+        local anims=type(data.AssetID)=="table" and data.AssetID or {data.AssetID}
+        for _,id in ipairs(anims) do
+            local a=Instance.new("Animation"); a.AnimationId=id
+            local t=char.Humanoid.Animator:LoadAnimation(a)
+            t.Priority=Enum.AnimationPriority.Action4
+            t:Play(); table.insert(S.tracks,t)
+        end
+        if data.SFX then
+            S.sound=Instance.new("Sound",char.HumanoidRootPart)
+            S.sound.SoundId=data.SFX; S.sound:Play()
+        end
+    end)
+end})
+
+local SB4=T.Spoofer:AddGroupbox({Side="Left",Name="Stats",IconName="bar-chart"})
+for _,n in ipairs({"Money","NetWorth","KillerChance","TimePlayed","KillerWins","Kills","SurvivorWins","ObjectivesCompleted"}) do
+    SB4:AddInput("SPSt_"..n,{Text="Set "..n,Default="",Placeholder="value",Numeric=true,ClearTextOnFocus=false,
+        Callback=function(t)
+            pcall(function()
+                local data=lp:FindFirstChild("PlayerData")
+                local st=data and data:FindFirstChild("Stats")
+                local v=st and st:FindFirstChild(n,true)
+                if v then v.Value=tonumber(t) or 0 end
+            end)
+        end})
+end
+
+local SB5=T.Spoofer:AddGroupbox({Side="Right",Name="Identity",IconName="user"})
+SB5:AddInput("SPN",{Text="Target Username",Default="",ClearTextOnFocus=false,Callback=function(v) S.tName=v end})
+SB5:AddToggle("SPNon",{Text="Set Username (client-only)",Default=false,Callback=function(v) S.nameLoop=v end})
+SB5:AddInput("SPD",{Text="Target DisplayName",Default="",ClearTextOnFocus=false,Callback=function(v) S.tDisp=v end})
+SB5:AddToggle("SPDon",{Text="Set DisplayName (client-only)",Default=false,Callback=function(v) S.dispLoop=v end})
+
+local SB6=T.Spoofer:AddGroupbox({Side="Right",Name="Misc",IconName="sparkles"})
+SB6:AddButton({Text="VIP Giver (visual)",Func=function()
+    pcall(function()
+        lp:SetAttribute("VIP",true)
+        local data=lp:FindFirstChild("PlayerData")
+        if data then
+            local v=data:FindFirstChild("VIP",true) or Instance.new("BoolValue",data)
+            v.Name="VIP"; v.Value=true
+        end
+    end)
+end})
+SB6:AddDropdown("SPDev",{Values={"PC","Mobile","Console"},Default="PC",Text="Device Spoofer",
+    Callback=function(v) lp:SetAttribute("Device",v) end})
+
+-- MISC
+local ML=T.Misc:AddGroupbox({Side="Left",Name="Chat & Lighting",IconName="message-square"})
+ML:AddButton({Text="Chat Visibility",Func=function()
+    pcall(function()
+        if TCS:FindFirstChild("ChatWindowConfiguration") and TCS:FindFirstChild("ChatInputBarConfiguration") then
+            TCS.ChatWindowConfiguration.Enabled=true
+            TCS.ChatInputBarConfiguration.Enabled=true
+        end
+    end)
+end})
+local fbO={}
+ML:AddToggle("FB",{Text="Fullbright",Default=false,Callback=function(v)
+    if v then
+        if not fbO.Ambient then
+            fbO={Ambient=L.Ambient,OutdoorAmbient=L.OutdoorAmbient,Brightness=L.Brightness,ClockTime=L.ClockTime}
+        end
+        L.Ambient=Color3.new(1,1,1); L.OutdoorAmbient=Color3.new(1,1,1)
+        L.Brightness=2; L.ClockTime=12
+    else
+        if fbO.Ambient then
+            L.Ambient=fbO.Ambient; L.OutdoorAmbient=fbO.OutdoorAmbient
+            L.Brightness=fbO.Brightness; L.ClockTime=fbO.ClockTime
+        end
+    end
+end})
+
+-- UI SETTINGS
+if TM then pcall(function() TM:SetLibrary(Lib); TM:SetFolder("Slashsaken"); TM:ApplyToTab(T.UISettings) end) end
+if SM then pcall(function() SM:SetLibrary(Lib); SM:IgnoreThemeSettings(); SM:SetIgnoreIndexes({"MenuKeybind"}); SM:SetFolder("Slashsaken/Configs"); SM:BuildConfigSection(T.UISettings) end) end
+local MG=T.UISettings:AddGroupbox({Side="Left",Name="Menu",IconName="wrench"})
+MG:AddLabel("Menu bind"):AddKeyPicker("MenuKeybind",{Default="RightShift",NoUI=true,Text="Menu keybind"})
+MG:AddButton({Text="Unload",Func=function() Lib:Unload() end})
+Lib.ToggleKeybind=Opt.MenuKeybind
+if SM then pcall(function() SM:LoadAutoloadConfig() end) end
+
+task.delay(3,function()
+    pcall(function() Lib:Toggle() end)
+    pcall(function() Win:Show() end)
+end)
+
+-- ═══════════════════════════════════════
+-- GAME LOOPS
+-- ═══════════════════════════════════════
+task.spawn(function()
+    task.wait(1)
+    local f=H.killers()
+    if f then
+        for _,k in ipairs(f:GetChildren()) do
+            if S.facingCheck or S.facingVisOn then F.addFacingV(k) end
+            if S.circlesVisible and not S.facingCheck then F.addCircle(k) end
+        end
+    end
+end)
+
+-- Name/display loops
+task.spawn(function()
+    while true do
+        if S.nameLoop then pcall(function() lp.Name=S.tName end) end
+        if S.dispLoop then
+            pcall(function()
+                lp.DisplayName=S.tDisp
+                if lp.Character and lp.Character:FindFirstChild("Humanoid") then
+                    lp.Character.Humanoid.DisplayName=S.tDisp
+                end
+            end)
+        end
+        task.wait(0.1)
+    end
+end)
+UIS.InputBegan:Connect(function(input,proc)
+    if not proc and input.KeyCode==Enum.KeyCode.Space then
+        for _,tr in ipairs(S.tracks) do pcall(function() tr:Stop() end) end
+        for i=#S.tracks,1,-1 do S.tracks[i]=nil end
+        if S.sound then pcall(function() S.sound:Stop(); S.sound:Destroy() end); S.sound=nil end
+    end
+end)
+
+-- Animator cache
+local cachedAnim
+local function refreshAnim()
+    local c=lp.Character
+    if not c then cachedAnim=nil; return end
+    local h=c:FindFirstChildOfClass("Humanoid")
+    cachedAnim=h and h:FindFirstChildOfClass("Animator") or nil
+end
+refreshAnim()
+lp.CharacterAdded:Connect(function() task.wait(0.5); refreshAnim() end)
+
+-- M1 detection (uses CORRECT var name now)
+Run.RenderStepped:Connect(function()
+    if not cachedAnim then refreshAnim() end
+    local a=cachedAnim; if not a then return end
+    local now=tick()
+    for _,t in ipairs(a:GetPlayingAnimationTracks()) do
+        local id=tostring(t.Animation.AnimationId):match("%d+")
+        if id and table.find(IDS.punch,id) then
+            local tp=0; pcall(function() tp=t.TimePosition or 0 end)
+            if tp<=0.15 and (now-S._lastM1Detect)>0.2 then
+                S._lastM1Detect=now; S.lastM1=now
+            end
+            break
+        end
+    end
+end)
+
+-- Auto punch hook
+task.spawn(function()
+    local ok,net=pcall(function() return require(RS.Modules.Network.Network) end)
+    if not ok or not net then return end
+    local function connect()
+        pcall(function()
+            net:SetConnection(("%*1337ParryIcon"):format(lp.Name),"REMOTE_EVENT",function(b)
+                if b and S.autoPunch then
+                    fireAbility("Punch")
+                end
+            end)
+        end)
+    end
+    connect()
+    lp.CharacterAdded:Connect(function() task.wait(0.9); connect() end)
+end)
+
+-- Survivor aim detection (watch own anims)
+local lastSAttack=0
+Run.RenderStepped:Connect(function()
+    if not cachedAnim then return end
+    local now=tick()
+    for _,t in ipairs(cachedAnim:GetPlayingAnimationTracks()) do
+        local id=tostring(t.Animation.AnimationId):match("%d+")
+        if id and table.find(IDS.punch,id) then
+            local tp=0; pcall(function() tp=t.TimePosition or 0 end)
+            if tp<=0.2 then lastSAttack=now; break end
+        end
+    end
+end)
+
+-- Survivor aim main
+Run.RenderStepped:Connect(function()
+    if not S.sAimOn or not F.isSurv() then return end
+    if tick()-lastSAttack>1.5 then return end
+    local kr=F.nearestKHRP(500); if not kr then return end
+    local cam=workspace.CurrentCamera; if not cam then return end
+    local pos=kr.Position
+    if S.sAimPred~="Off" then
+        local v=kr.AssemblyLinearVelocity or Vector3.new()
+        if v.Magnitude>200 then v=Vector3.new() end
+        pos=pos+v*math.clamp(S.sAimVelLead,0,0.75)
+    end
+    if S.sAimMode=="Camera" or S.sAimMode=="HRP+Camera" then
+        cam.CFrame=cam.CFrame:Lerp(CFrame.lookAt(cam.CFrame.Position,pos),S.sAimSmooth)
+    end
+    if S.sAimMode=="HRP" or S.sAimMode=="HRP+Camera" then
+        local c=lp.Character; local mr=c and c:FindFirstChild("HumanoidRootPart")
+        if mr then
+            local flat=Vector3.new(pos.X,mr.Position.Y,pos.Z)
+            if (flat-mr.Position).Magnitude>0.1 then
+                mr.CFrame=mr.CFrame:Lerp(CFrame.lookAt(mr.Position,flat),S.sAimSmooth)
+            end
+        end
+    end
+end)
+
+-- Survivor stab watch
+task.spawn(function()
+    local function attach(c)
+        local h=c:WaitForChild("Humanoid",5)
+        local a=h and h:WaitForChild("Animator",5)
+        if not a then return end
+        a.AnimationPlayed:Connect(function(t)
+            local id=tostring(t.Animation.AnimationId):match("%d+")
+            if id and (id=="100725497418533" or id=="89448354637442") and S.sStabOn then
+                task.spawn(F.triggerStab)
+            end
+        end)
+    end
+    if lp.Character then attach(lp.Character) end
+    lp.CharacterAdded:Connect(attach)
+end)
+
+-- Main auto block
+local autoTrig={}
+for _,id in ipairs(IDS.autoAnim) do autoTrig[id]=true end
+
+Run.RenderStepped:Connect(function()
+    if not S.autoBlockOn or H.isHelpless() or H.m1Locked() then return end
+    local c=lp.Character; if not c then return end
+    local mr=c:FindFirstChild("HumanoidRootPart"); if not mr then return end
+    local gui=PG:FindFirstChild("MainUI")
+    local cd=gui and gui:FindFirstChild("AbilityContainer")
+        and gui.AbilityContainer:FindFirstChild("Block")
+        and gui.AbilityContainer.Block:FindFirstChild("CooldownTime")
+    local f=H.killers(); if not f then return end
+    for _,k in ipairs(f:GetChildren()) do
+        local hrp=k:FindFirstChild("HumanoidRootPart")
+        local hum=k:FindFirstChildOfClass("Humanoid")
+        if hrp and hum and H.inZone(mr,hrp) and H.los(hrp) and not H.flicking(k,mr,hrp) then
+            local a=hum:FindFirstChildOfClass("Animator")
+            if a then
+                for _,t in ipairs(a:GetPlayingAnimationTracks()) do
+                    local id=tostring(t.Animation.AnimationId):match("%d+")
+                    if autoTrig[id] then
+                        if cd and cd.Text=="" then
+                            if S.blockdelay>0 then task.wait(S.blockdelay) end
+                            H.fireBlock()
+                        end
+                        break
+                    end
+                end
+            end
+        end
+    end
+end)
+
+-- Aim lock
+Run.RenderStepped:Connect(function()
+    local aimP=S.animLockOn or S.aimToggle.CharLock
+    local camL=S.aimToggle.CamLock
+    if not (aimP or camL) then return end
+    local c=lp.Character
+    local mr=c and c:FindFirstChild("HumanoidRootPart")
+    if not mr then return end
+    local cam=workspace.CurrentCamera
+    if not cachedAnim then refreshAnim() end
+    local a=cachedAnim; if not a then return end
+    local f=H.killers(); if not f then return end
+    for _,k in ipairs(f:GetChildren()) do
+        local r=k:FindFirstChild("HumanoidRootPart")
+        if r then
+            for _,t in ipairs(a:GetPlayingAnimationTracks()) do
+                local id=tostring(t.Animation.AnimationId):match("%d+")
+                if table.find(IDS.punch,id) then
+                    local tp=0; pcall(function() tp=t.TimePosition or 0 end)
+                    if tp<=0.1 then
+                        local h=c:FindFirstChild("Humanoid")
+                        if h and aimP then h.AutoRotate=false end
+                        task.spawn(function()
+                            local st=tick()
+                            while tick()-st<S.AIM_WIN do
+                                if mr and r and r.Parent then
+                                    local pred=r.Position+r.CFrame.LookVector*S.predictionVal
+                                    if aimP then mr.CFrame=CFrame.lookAt(mr.Position,pred) end
+                                    if camL then cam.CFrame=CFrame.lookAt(cam.CFrame.Position,pred) end
+                                end
+                                task.wait()
+                            end
+                            if h and aimP then h.AutoRotate=true end
+                        end)
+                    end
+                end
+            end
+        end
+    end
+end)
+
+-- Visual updater
+Run.RenderStepped:Connect(function()
+    local mr=lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
+    for k,v in pairs(S.facingList) do
+        if not k.Parent or not k:FindFirstChild("HumanoidRootPart") then F.removeFacingV(k)
+        else
+            local hrp=k.HumanoidRootPart
+            local c,r=H.facing(hrp)
+            v.Radius=r; v.Height=0.12
+            v.CFrame=CFrame.new(0,-(hrp.Size.Y/2+0.05),-(c-hrp.Position).Magnitude)*CFrame.Angles(math.rad(90),0,0)
+            local vis=S.facingCheck or S.facingVisOn
+            v.Transparency=vis and 0.5 or 1
+            if mr then
+                v.Color3=((mr.Position-c).Magnitude<=r) and Color3.fromRGB(255,60,60) or Color3.fromRGB(255,255,0)
+            end
+        end
+    end
+    for k,c in pairs(S.circleList) do
+        if c and c.Parent and k:FindFirstChild("HumanoidRootPart") then
+            local vis=S.circlesVisible and not S.facingCheck
+            c.Transparency=vis and 0.6 or 1
+            c.Radius=S.range
+            if mr and vis then
+                local d=(k.HumanoidRootPart.Position-mr.Position).Magnitude
+                c.Color3=d<=S.range and Color3.fromRGB(255,165,0) or Color3.fromRGB(255,255,0)
+            end
+        end
+    end
+end)
+
+-- Killer state + flick
+Run.RenderStepped:Connect(function(dt)
+    if dt<=0 then return end
+    local f=H.killers(); if not f then return end
+    for _,k in ipairs(f:GetChildren()) do
+        local hrp=k:FindFirstChild("HumanoidRootPart")
+        if hrp then
+            local st=S.kState[k] or {prevPos=hrp.Position,prevLook=hrp.CFrame.LookVector,vel=Vector3.new(),angVel=0,rawAngVel=0}
+            st.vel=(hrp.Position-st.prevPos)/math.max(dt,1e-6); st.prevPos=hrp.Position
+            local prev=st.prevLook or hrp.CFrame.LookVector
+            local cur=hrp.CFrame.LookVector
+            local dot=math.clamp(prev:Dot(cur),-1,1)
+            local ang=math.acos(dot)
+            local cy=prev:Cross(cur).Y
+            local sign=(cy>=0) and 1 or -1
+            local raw=(ang/math.max(dt,1e-6))*sign
+            st.rawAngVel=raw
+            st.angVel=(st.angVel or 0)*0.78+raw*0.22
+            st.prevLook=cur
+            if S.flickOn then
+                local dps=math.abs(raw)*(180/math.pi)
+                if dps>S.flickDegSec then S.flickData[k]={lastFlickTick=tick()} end
+            end
+            S.kState[k]=st
+        end
+    end
+end)
+
+-- Folder watcher
+task.spawn(function()
+    while true do
+        local f=H.killers()
+        if f then
+            for _,d in ipairs(f:GetDescendants()) do if d:IsA("Sound") then hookSound(d) end end
+            f.DescendantAdded:Connect(function(d) if d:IsA("Sound") then hookSound(d) end end)
+            f.ChildAdded:Connect(function(k)
+                if S.facingCheck or S.facingVisOn then task.spawn(function() task.wait(0.1); F.addFacingV(k) end) end
+                if S.circlesVisible and not S.facingCheck then task.spawn(function() task.wait(0.1); F.addCircle(k) end) end
+            end)
+            f.ChildRemoved:Connect(function(k) F.removeFacingV(k); F.removeCircle(k); S.flickData[k]=nil end)
+            break
+        end
+        task.wait(0.5)
+    end
+end)
+
+-- HDT trigger
+Run.RenderStepped:Connect(function()
+    if not S.hdtOn or H.isHelpless() then return end
+    if not cachedAnim then refreshAnim() end
+    local a=cachedAnim; if not a then return end
+    for _,t in ipairs(a:GetPlayingAnimationTracks()) do
+        local ok,id=pcall(function() return t.Animation and tostring(t.Animation.AnimationId):match("%d+") end)
+        if ok and id and table.find(IDS.block,id) then
+            local tp=0; pcall(function() tp=t.TimePosition or 0 end)
+            if tp<=0.12 then
+                local n=H.nearest()
+                if n and not S.hdtDebounce then task.spawn(function() F.beginDrag(n) end) end
+            end
+        end
+    end
+end)
+
+-- ESP loop
+task.spawn(function()
+    while true do
+        task.wait(1.5)
+        if S.espK then
+            S.kHl=F.clearHl(S.kHl)
+            local f=H.killers()
+            if f then for _,k in ipairs(f:GetChildren()) do F.hl(k,Color3.fromRGB(255,0,0),S.kHl) end end
+        end
+        if S.espS then
+            S.sHl=F.clearHl(S.sHl)
+            local p=WS:FindFirstChild("Players")
+            local sf=p and p:FindFirstChild("Survivors")
+            if sf then
+                for _,s in ipairs(sf:GetChildren()) do
+                    if s~=lp.Character then F.hl(s,Color3.fromRGB(0,255,0),S.sHl) end
+                end
+            end
+        end
+    end
+end)
+WS.DescendantAdded:Connect(function(d)
+    if S.espMed or S.espBloxy then task.spawn(function() task.wait(0.1); F.itemHl(d) end) end
+    if S.espGen and d.Name=="Generator" then task.spawn(function() task.wait(0.1); F.attachGen(d) end) end
+end)
+
+-- Killer auto-parry
+Run.Heartbeat:Connect(function()
+    if not S.kpOn then return end
+    local myK=H.myKiller()
+    if not H.isSupported(myK) then
+        local now=tick()
+        if now-S.kpStatus>=1 then
+            S.kpStatus=now
+            pcall(function() Opt.KPStat:SetText("Status: "..(myK and ("Unsupported: "..myK) or "Not a killer")) end)
+        end
+        return
+    end
+    local now=tick()
+    if now-S.kpStatus>=1 then
+        S.kpStatus=now
+        pcall(function() Opt.KPStat:SetText("Status: Active as "..myK) end)
+    end
+    if tick()-S.kpLast<S.kpCD then return end
+    local mr=lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
+    if not mr then return end
+    local ability=H.abilityFor(myK); if not ability then return end
+    for _,ch in ipairs(H.others()) do
+        local tr=ch:FindFirstChild("HumanoidRootPart")
+        if tr and (tr.Position-mr.Position).Magnitude<=S.kpRange then
+            local h=ch:FindFirstChildOfClass("Humanoid")
+            local a=h and h:FindFirstChildOfClass("Animator")
+            if a then
+                for _,t in ipairs(a:GetPlayingAnimationTracks()) do
+                    if not S.kpSeen[t] then
+                        local ok,id=pcall(function() return tostring(t.Animation and t.Animation.AnimationId or ""):match("%d+") end)
+                        if ok and id and S.kpAnimIds[id] then
+                            S.kpSeen[t]=true; S.kpLast=tick()
+                            pcall(function() Opt.KPLast:SetText("Last: "..ch.Name.." / "..id) end)
+                            if S.kpDelay>0 then
+                                task.delay(S.kpDelay,function() fireAbility(ability) end)
+                            else
+                                fireAbility(ability)
+                            end
+                            break
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
+
+-- Killer parry range visual
+Run.RenderStepped:Connect(function()
+    local c=lp.Character
+    local mr=c and c:FindFirstChild("HumanoidRootPart")
+    local myK=H.myKiller()
+    local show=S.kpVis and S.kpOn and mr and H.isSupported(myK)
+    if not show then
+        if S.kpVisual and S.kpVisual.Parent then S.kpVisual:Destroy() end
+        S.kpVisual=nil; return
+    end
+    if not S.kpVisual or not S.kpVisual.Parent then
+        S.kpVisual=Instance.new("CylinderHandleAdornment")
+        S.kpVisual.Name="KPVisual"; S.kpVisual.Adornee=mr
+        S.kpVisual.AlwaysOnTop=true; S.kpVisual.Color3=Color3.fromRGB(180,50,255)
+        S.kpVisual.Transparency=0.55; S.kpVisual.Height=0.1; S.kpVisual.ZIndex=1
+        S.kpVisual.Parent=mr
+    end
+    S.kpVisual.Radius=S.kpRange
+    S.kpVisual.CFrame=CFrame.new(0,-(mr.Size.Y/2+0.05),0)*CFrame.Angles(math.rad(90),0,0)
+end)
+
+-- Raging pace
+Run.Heartbeat:Connect(function()
+    if not S.ragingPace then return end
+    local f=H.killers(); if not f then return end
+    local mr=lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
+    if not mr then return end
+    local set={}; for _,id in ipairs(IDS.punch) do set[id]=true end
+    for _,k in ipairs(f:GetChildren()) do
+        local hrp=k:FindFirstChild("HumanoidRootPart")
+        local h=k:FindFirstChildOfClass("Humanoid")
+        if hrp and h and (hrp.Position-mr.Position).Magnitude<=19 then
+            local a=h:FindFirstChildOfClass("Animator")
+            if a then
+                for _,t in ipairs(a:GetPlayingAnimationTracks()) do
+                    local id=tostring(t.Animation.AnimationId):match("%d+")
+                    if set[id] then
+                        task.spawn(function()
+                            local i=0
+                            while i<20 do
+                                H.fireRaging(); task.wait(0.05); i=i+1
+                            end
+                        end)
+                        break
+                    end
+                end
+            end
+        end
+    end
+end)
+
+warn("[Slashsaken] Loaded in "..string.format("%.2fs",tick()-_t0))
