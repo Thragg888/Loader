@@ -209,6 +209,25 @@ local aimEventRefCount   = 0
 local aimEventActive     = false
 local aimTargetHRP       = nil
 
+-- Noli void rush
+local noliConfig       = nil
+local noliVoidRushMode = "Off"
+
+-- c00lkidd dash
+local controllableDashEnabled = false
+
+-- Generator system (ForsakenPlus)
+local autoGenEnabled         = false
+local autoGenCooldown        = 4
+local autoGenSpeedUp         = false
+local autoGenFixing          = false
+local autoGenRNG             = Random.new()
+local autoGenCurrentGrid     = 6
+local autoGenGridOverride    = false
+local autoGenGridSize        = 6
+local autoGenOverlayTemplate = nil
+local hideCompletedGens      = true
+
 -- ==========================================
 -- CONSTANTS
 -- ==========================================
@@ -218,24 +237,36 @@ local PARRY_KEYWORDS = {
 }
 
 local AIM_KEYWORDS = {
-    "slash",
-    "parry punch",
-    "one shot",
-    "oneshot",
-    "gun explosion",
-    "sacrificial dagger",
-    "backstab",
-    "hatchet",
+    "slash", "parry punch", "one shot", "oneshot",
+    "gun explosion", "sacrificial dagger", "backstab", "hatchet",
 }
-
 local AIM_PING_KEYWORDS = { "gun explosion" }
 
-local GUEST_PARRY_ANIMS = {
-    "72722244508749","96959123077498","95802026624883","140671644163156","100926346851492",
+-- HARDCODED parry anim detection list
+local HARDCODED_KILLER_PARRY_ANIMS = {
+    "116618003477002", "111918351126361", "108018357044094",
+    "83745199070305", "133491532453922", "90499469533503",
+    "72722244508749", "96959123077498", "95802026624883",
+    "140671644163156", "100926346851492",
 }
 
-local blockAnimIds  = { "72722244508749","96959123077498","95802026624883","140671644163156","100926346851492" }
-local punchAnimIds  = { "87259391926321","99100240941590","72685103823181","81905101227053","113936304594883","140703210927645","136007065400978","129843313690921","86709774283672","108807732150251","138040001965654","86096387000557","119850211147676","131696603025265","119462383658044","116618003477002","133491532453922","76649505662612","71190646367497" }
+local GUEST_PARRY_ANIMS = {
+    "72722244508749", "96959123077498", "95802026624883",
+    "140671644163156", "100926346851492",
+}
+
+local blockAnimIds = {
+    "72722244508749", "96959123077498", "95802026624883",
+    "140671644163156", "100926346851492",
+}
+
+local punchAnimIds = {
+    "87259391926321","99100240941590","72685103823181","81905101227053",
+    "113936304594883","140703210927645","136007065400978","129843313690921",
+    "86709774283672","108807732150251","138040001965654","86096387000557",
+    "119850211147676","131696603025265","119462383658044","116618003477002",
+    "133491532453922","76649505662612","71190646367497",
+}
 
 local autoBlockTriggerSounds = {}
 for _, id in ipairs({
@@ -268,7 +299,7 @@ local autoBlockTriggerAnims = {
     "90620531468240","91509234639766","99824350842479","126171487400618","101101433684051",
     "106860049270347","70483423693126","126727756047566","137642639873297","77375846492436",
     "121293883585738","81639435858902","137314737492715","92173139187970","108196996477620",
-    "90819435118493","123172382755876"
+    "90819435118493","123172382755876",
 }
 
 local killerState       = {}
@@ -277,6 +308,18 @@ local soundBlockedUntil = {}
 local detectionCircles  = {}
 local facingVisuals     = {}
 local m1ActiveByKiller  = {}
+
+-- Noli presets
+local NOLI_VOID_RUSH_DEFAULTS = {
+    InitialTurnDuration = 1.5,
+    TurnSpeed           = 1,
+    InitialTurnMult     = 6.6,
+}
+local NOLI_MODES = {
+    Subtle = { InitialTurnDuration = 1.20, TurnSpeed = 20,    InitialTurnMult = 10   },
+    Smooth = { InitialTurnDuration = 0.60, TurnSpeed = 500,   InitialTurnMult = 100  },
+    Car    = { InitialTurnDuration = 0.01, TurnSpeed = 10000, InitialTurnMult = 1000 },
+}
 
 -- ==========================================
 -- ROLE HELPERS
@@ -383,11 +426,13 @@ local function abilityForKiller(name)
     if l == "slasher" then return "RagingPace" end
     return nil
 end
-local function updateKillerParryAnims(str)
+local function updateKillerParryAnims()
     killerParryAnimIds = {}
-    for id in tostring(str or ""):gmatch("%d+") do killerParryAnimIds[id] = true end
-    for _, id in ipairs(GUEST_PARRY_ANIMS) do killerParryAnimIds[id] = true end
+    for _, id in ipairs(HARDCODED_KILLER_PARRY_ANIMS) do
+        killerParryAnimIds[id] = true
+    end
 end
+updateKillerParryAnims()
 local function setKillerParryLastLabel(txt)
     pcall(function() Options.KP_LastTrigger:SetText("Last trigger: " .. tostring(txt)) end)
 end
@@ -405,6 +450,75 @@ local function nameMatchesParryKeyword(name)
     end
     return false
 end
+
+-- ==========================================
+-- NOLI VOID RUSH (3 MODES)
+-- ==========================================
+local function findConfigKey(cfg, name, seen)
+    if type(cfg) ~= "table" then return nil end
+    seen = seen or {}
+    if seen[cfg] then return nil end
+    seen[cfg] = true
+    for k, v in pairs(cfg) do
+        if type(k) == "string" and k:find(name, 1, true) and not k:find(name .. "OG", 1, true) then
+            return k, cfg
+        end
+        if type(v) == "table" then
+            local fk, fp = findConfigKey(v, name, seen)
+            if fk then return fk, fp end
+        end
+    end
+    return nil
+end
+
+local function applyNoliVoidRush(mode)
+    if not noliConfig then return false end
+    local preset = (mode ~= "Off") and NOLI_MODES[mode] or nil
+    for key, defaultVal in pairs(NOLI_VOID_RUSH_DEFAULTS) do
+        local fk, fp = findConfigKey(noliConfig, key)
+        if fk and fp then
+            if fp[fk .. "OG"] == nil then
+                fp[fk .. "OG"] = fp[fk]
+            end
+            if preset then
+                fp[fk] = preset[key]
+            else
+                fp[fk] = fp[fk .. "OG"] or defaultVal
+            end
+        end
+    end
+    return true
+end
+
+task.spawn(function()
+    local Assets = ReplicatedStorage:FindFirstChild("Assets")
+    if not Assets then return end
+    local Killers = Assets:FindFirstChild("Killers")
+    if not Killers then return end
+
+    local function tryLoad(folder)
+        if not folder then return false end
+        local Config = folder:FindFirstChild("Config")
+        if not Config then return false end
+        local ok, cfg = pcall(require, Config)
+        if ok and type(cfg) == "table" and findConfigKey(cfg, "InitialTurnMult") then
+            noliConfig = cfg
+            return true
+        end
+        return false
+    end
+
+    local loaded = tryLoad(Killers:FindFirstChild("Noli"))
+    if not loaded then
+        for _, killer in ipairs(Killers:GetChildren()) do
+            if tryLoad(killer) then loaded = true; break end
+        end
+    end
+
+    if loaded and noliVoidRushMode ~= "Off" then
+        applyNoliVoidRush(noliVoidRushMode)
+    end
+end)
 
 -- ==========================================
 -- FACING MATH
@@ -641,7 +755,7 @@ local function removeKillerCircle(killer)
 end
 
 -- ==========================================
--- SOUND HOOK
+-- SOUND HOOK (with hrp caching)
 -- ==========================================
 local function extractNumericSoundId(sound)
     if not sound or not sound.SoundId then return nil end
@@ -698,7 +812,18 @@ end
 local function hookSound(sound)
     if not sound or not sound:IsA("Sound") or soundHooks[sound] then return end
     local preId = extractNumericSoundId(sound)
-    soundHooks[sound] = { id = preId }
+
+    local cachedHRP
+    do
+        local _, part = getSoundWorldPosition(sound)
+        if part then
+            local char = getCharacterFromDescendant(part)
+            cachedHRP = char and char:FindFirstChild("HumanoidRootPart")
+        end
+    end
+
+    soundHooks[sound] = { id = preId, hrp = cachedHRP }
+
     local function fire()
         if autoblockToggles["Block"]  then _attemptForSound(sound, preId, "Block")  end
         if autoblockToggles["Charge"] then _attemptForSound(sound, preId, "Charge") end
@@ -710,7 +835,7 @@ local function hookSound(sound)
 end
 
 -- ==========================================
--- INVIS
+-- INVISIBILITY
 -- ==========================================
 local invisAnimId = "75804462760596"
 local invisRunning, invisThread, invisCurrent = false, nil, nil
@@ -933,14 +1058,11 @@ local function aimPopEvent()
     end
 end
 
--- Detect ability via ID **or** name (OR logic — either path triggers aim)
 local function resolveAbilityFromAnim(animId, animName)
-    -- Path 1: anim ID → config ability name → keyword match
     if animId then
         local fromCfg = aimAbilityAnimIds[animId]
         if fromCfg and matchesAny(fromCfg, AIM_KEYWORDS) then return fromCfg end
     end
-    -- Path 2: raw anim name → keyword match
     if animName and matchesAny(animName, AIM_KEYWORDS) then return animName end
     return nil
 end
@@ -1088,15 +1210,242 @@ lp.CharacterAdded:Connect(function(c)
     task.spawn(attachAimToChar, c)
 end)
 
-RunService.RenderStepped:Connect(function()
-    if not aimState.Enabled then return end
-    if not aimEventActive then return end
-    if not aimTargetHRP or not aimTargetHRP.Parent then return end
-    applyAimTo(predictAimPos(aimTargetHRP), aimState.AimMode)
+-- ==========================================
+-- GENERATOR SYSTEM (ForsakenPlus)
+-- ==========================================
+local function isAnyPlayerNear(distance)
+    local char = lp.Character
+    local root = char and char:FindFirstChild("HumanoidRootPart")
+    if not root then return false end
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= lp and p.Character then
+            local r = p.Character:FindFirstChild("HumanoidRootPart")
+            if r and (r.Position - root.Position).Magnitude < distance then
+                return true
+            end
+        end
+    end
+    return false
+end
+
+local function buildOverlay()
+    if autoGenOverlayTemplate then return autoGenOverlayTemplate end
+    local loadUI = Instance.new("TextButton")
+    loadUI.Name = "AutoGenOverlay"
+    loadUI.BackgroundColor3 = Color3.new(0, 0, 0)
+    loadUI.BackgroundTransparency = 0.4
+    loadUI.BorderSizePixel = 0
+    loadUI.Active = true
+    loadUI.Interactable = true
+    loadUI.AutoButtonColor = false
+    loadUI.Size = UDim2.new(1, 0, 1, 0)
+    loadUI.ZIndex = 7
+    loadUI.Text = ""
+
+    local folder = Instance.new("Folder")
+    folder.Name = "Dots"
+    folder.Parent = loadUI
+
+    for i = 1, 3 do
+        local dot = Instance.new("TextLabel")
+        dot.Name = tostring(i)
+        dot.AnchorPoint = Vector2.new(0.5, 0)
+        dot.BackgroundTransparency = 1
+        dot.Position = UDim2.new(0.5, 0, -0.05, 0)
+        dot.Size = UDim2.new(0.1, 0, 1, 0)
+        dot.ZIndex = 4
+        dot.Font = Enum.Font.Cartoon
+        dot.Text = "."
+        dot.TextColor3 = Color3.new(1, 1, 1)
+        dot.TextSize = 50
+        dot.TextScaled = true
+        dot.TextStrokeTransparency = 0.9
+        dot.Parent = folder
+    end
+
+    local label = Instance.new("TextLabel")
+    label.Name = "TextButton"
+    label.BackgroundTransparency = 1
+    label.AnchorPoint = Vector2.new(0.5, 0.5)
+    label.Position = UDim2.new(0.5, 0, 0.6, 0)
+    label.Size = UDim2.new(0.4, 0, 0.4, 0)
+    label.ZIndex = 7
+    label.Font = Enum.Font.SciFi
+    label.Text = "Completing"
+    label.TextColor3 = Color3.new(1, 1, 1)
+    label.TextSize = 20
+    label.TextScaled = true
+    label.TextStrokeTransparency = 0.9
+    label.Parent = loadUI
+
+    autoGenOverlayTemplate = loadUI
+    return loadUI
+end
+
+PlayerGui.ChildAdded:Connect(function(child)
+    if child.Name ~= "PuzzleUI" then return end
+    if not autoGenEnabled then return end
+    task.wait()
+    local container = child:FindFirstChild("Container")
+    local gridHolder = container and container:FindFirstChild("GridHolder")
+    if not gridHolder then return end
+    local overlay = buildOverlay():Clone()
+    overlay.Parent = gridHolder
+    task.spawn(function()
+        while overlay and overlay.Parent do
+            for i = 1, 3 do
+                local dot = overlay.Dots and overlay.Dots[tostring(i)]
+                if dot then
+                    dot.Rotation = math.cos(tick() + i * 10) * 360
+                end
+            end
+            task.wait()
+        end
+    end)
+end)
+
+task.spawn(function()
+    while task.wait(0.25) do
+        if not autoGenEnabled or autoGenFixing then continue end
+        local char = lp.Character
+        if not char then continue end
+        local root = char:FindFirstChild("HumanoidRootPart")
+        if not root or root.Anchored then continue end
+        if not PlayerGui:FindFirstChild("PuzzleUI") then continue end
+
+        local map     = workspace:FindFirstChild("Map")
+        local ingame  = map and map:FindFirstChild("Ingame")
+        local gameMap = ingame and ingame:FindFirstChild("Map")
+        if not gameMap then continue end
+
+        for _, obj in ipairs(gameMap:GetDescendants()) do
+            if obj.Name == "Generator" and obj:IsA("Model") then
+                local main = obj:FindFirstChild("Main")
+                if main and (main.Position - root.Position).Magnitude < 6.7 then
+                    local remotes  = obj:FindFirstChild("Remotes")
+                    local progress = obj:FindFirstChild("Progress")
+                    local remoteEvent = remotes and remotes:FindFirstChildOfClass("RemoteEvent")
+                    if remoteEvent and progress then
+                        autoGenFixing = true
+                        task.spawn(function()
+                            while autoGenEnabled do
+                                local pui = PlayerGui:FindFirstChild("PuzzleUI")
+                                if not pui then break end
+                                if progress.Value >= 100 then break end
+
+                                local defaultPui = ReplicatedStorage:FindFirstChild("PuzzleUI", true)
+                                if defaultPui then
+                                    local liveGui = pui:FindFirstChildWhichIsA("GuiObject")
+                                    local defGui  = defaultPui:FindFirstChildWhichIsA("GuiObject")
+                                    if liveGui and defGui and liveGui.Size ~= defGui.Size then
+                                        break
+                                    end
+                                end
+
+                                local isNear = isAnyPlayerNear(32)
+                                local genCD  = autoGenCooldown
+                                if autoGenSpeedUp and not isNear and genCD > 2 then
+                                    genCD = 1.5
+                                end
+                                task.wait(autoGenRNG:NextNumber(genCD * 0.9, genCD * 1.1))
+
+                                if not PlayerGui:FindFirstChild("PuzzleUI") or not autoGenEnabled then break end
+                                if progress.Value >= 100 then break end
+
+                                pcall(function() remoteEvent:FireServer() end)
+                            end
+                            autoGenFixing = false
+                        end)
+                        break
+                    end
+                end
+            end
+        end
+    end
+end)
+
+task.spawn(function()
+    local FlowGame = ReplicatedStorage:FindFirstChild("FlowGame", true)
+    if not FlowGame then return end
+    local ok, FlowGameFunctions = pcall(require, FlowGame)
+    if not ok or type(FlowGameFunctions) ~= "table" or type(FlowGameFunctions.new) ~= "function" then return end
+    local originalNew = FlowGameFunctions.new
+    FlowGameFunctions.new = function(...)
+        local args = { ... }
+        if autoGenGridOverride and (type(args[2]) == "number" or args[2] == nil) then
+            args[2] = autoGenGridSize
+            autoGenCurrentGrid = autoGenGridSize
+        end
+        return originalNew(table.unpack(args))
+    end
 end)
 
 -- ==========================================
--- WINDOW
+-- C00LKIDD DASH
+-- ==========================================
+local function setupControllableDash(char)
+    if not char then return end
+    local root = char:FindFirstChild("HumanoidRootPart") or char:WaitForChild("HumanoidRootPart", 5)
+    if not root then return end
+    local hum = char:FindFirstChildOfClass("Humanoid") or char:WaitForChild("Humanoid", 5)
+    if not hum then return end
+
+    local function isCoolkidd()
+        local name = char.Name:lower():gsub("0", "o")
+        return name:find("coolkid", 1, true) ~= nil
+    end
+
+    root.ChildAdded:Connect(function(child)
+        if not child:IsA("LinearVelocity") then return end
+        if not isCoolkidd() then return end
+
+        local origDir = child.LineDirection
+        local origMag = origDir.Magnitude
+
+        local function update()
+            if not controllableDashEnabled then return end
+            local cam = workspace.CurrentCamera
+            local dir
+            if hum.MoveDirection ~= Vector3.zero then
+                dir = hum.MoveDirection
+            elseif cam then
+                dir = Vector3.new(cam.CFrame.LookVector.X, 0, cam.CFrame.LookVector.Z)
+                if dir.Magnitude > 0 then dir = dir.Unit end
+            end
+            if dir and dir.Magnitude > 0 then
+                child.LineDirection = dir * origMag
+                if child.LineVelocity > 0 and cam then
+                    root.CFrame = root.CFrame:Lerp(
+                        CFrame.lookAt(root.Position, root.Position + Vector3.new(dir.X, 0, dir.Z)),
+                        0.05
+                    )
+                end
+            end
+        end
+        update()
+
+        local c1 = hum:GetPropertyChangedSignal("MoveDirection"):Connect(update)
+        local c2 = workspace.CurrentCamera and workspace.CurrentCamera:GetPropertyChangedSignal("CFrame"):Connect(update)
+        child.Destroying:Once(function()
+            if c1 then c1:Disconnect() end
+            if c2 then c2:Disconnect() end
+        end)
+    end)
+end
+if lp.Character then task.spawn(setupControllableDash, lp.Character) end
+lp.CharacterAdded:Connect(setupControllableDash)
+
+-- Noli auto-apply on spawn
+lp.CharacterAdded:Connect(function()
+    task.delay(1, function()
+        if noliVoidRushMode ~= "Off" and noliConfig then
+            applyNoliVoidRush(noliVoidRushMode)
+        end
+    end)
+end)
+
+-- ==========================================
+-- WINDOW + TABS
 -- ==========================================
 local Window = Library:CreateWindow({
     Title            = "Slashsaken [Beta]",
@@ -1125,7 +1474,7 @@ local Tabs = {
 local VisL = Tabs.Esp:AddGroupbox({ Side="Left", Name="Players", IconName="users" })
 VisL:AddToggle("ESP_Killer",   { Text="Killer ESP",    Default=false, Callback=function(v) espKillerActive=v end })
 VisL:AddToggle("ESP_Survivor", { Text="Survivors ESP", Default=false, Callback=function(v) espSurvivorActive=v end })
-local VisR = Tabs.Esp:AddGroupbox({ Side="Right", Name="Items", IconName="package" })
+local VisR = Tabs.Esp:AddGroupbox({ Side="Right", Name="Items & Gens", IconName="package" })
 VisR:AddToggle("ESP_Medkit",  { Text="Medkit ESP", Default=false, Callback=function(v)
     espMedkitActive=v
     if v then scanItems("Medkit") else medkitHighlights=clearList(medkitHighlights) end
@@ -1137,6 +1486,11 @@ end })
 VisR:AddToggle("ESP_Generators", { Text="Generators ESP", Default=false, Callback=function(v)
     espGeneratorsActive=v; espDoGenerators(v)
 end })
+VisR:AddToggle("ESP_HideCompleted", {
+    Text    = "Hide Completed Generators",
+    Default = true,
+    Callback = function(v) hideCompletedGens = v end,
+})
 
 -- STAM
 local StamL = Tabs.Stam:AddGroupbox({ Side="Left", Name="Stamina", IconName="zap" })
@@ -1232,7 +1586,7 @@ FCRight:AddInput("FP_Window", { Text = "Flick Window (s)", Default = "0.25", Num
 
 -- NOTICE
 Tabs.Notice:AddGroupbox({ Side="Left", Name="Info", IconName="info" }):AddLabel({
-    Text = "Slashsaken [Beta]\n\nBy viltrumite\n\n• Auto Block — instant, 27s cd + 0.2s anti-spam\n• Facing Circle — yellow/red/green\n• HDT — survivor only, shares 27s cd with Block\n• Killer Auto-Parry — 404Error/RagingPace\n• Aim — watches your own ability (ID **or** name): slash / parry punch / one shot / gun explosion / sacrificial dagger / backstab / hatchet",
+    Text = "Slashsaken [Beta]\n\nBy viltrumite\n\n• Auto Block — instant, 27s cd + 0.2s anti-spam\n• Facing Circle — yellow / red / green (M1 detected)\n• HDT — survivor only, shares 27s cd with Block\n• Killer Auto-Parry — 404Error / RagingPace\n• Aim — own ability via ID OR name\n• Noli Void Rush — Subtle / Smooth / Car\n• Generator — full auto-gen with grid override",
     DoesWrap = true,
 })
 
@@ -1345,30 +1699,94 @@ TechR:AddButton({ Text="Fake Lag Tech", Func=function()
     end)
 end })
 
--- KILLER TAB (no Auto Raging Pace)
-local KPBox = Tabs.Killer:AddGroupbox({ Side = "Right", Name = "Killer Auto-Parry", IconName = "shield-alert" })
+-- KILLER TAB (parry on LEFT, Noli + Dash on RIGHT)
+local KPBox = Tabs.Killer:AddGroupbox({ Side = "Left", Name = "Killer Auto-Parry", IconName = "shield-alert" })
 KPBox:AddToggle("KP_On", {
     Text = "Killer Auto-Parry",
     Default = false,
-    Tooltip = "JohnDoe (404Error) or Slasher (RagingPace). Scans survivors in range.",
+    Tooltip = "JohnDoe (404Error) or Slasher (RagingPace). Scans survivors in range. Detection list is hardcoded.",
     Callback = function(v) killerAutoParryEnabled = v end,
 })
-KPBox:AddInput("KP_AnimIds", {
-    Text = "Extra Parry Anim IDs (comma-separated)",
-    Default = "116618003477002,111918351126361,108018357044094,83745199070305,133491532453922,90499469533503",
-    ClearTextOnFocus = false,
-    Callback = function(v) updateKillerParryAnims(v) end,
-})
-KPBox:AddInput("KP_Range", { Text = "Circle Range (studs)", Default = "15", Numeric = true, ClearTextOnFocus = false, Callback = function(v) killerParryRange = tonumber(v) or 15 end })
-KPBox:AddInput("KP_Delay", { Text = "Delay (0 = instant)", Default = "0", Numeric = true, ClearTextOnFocus = false, Callback = function(v) killerParryDelay = tonumber(v) or 0 end })
-KPBox:AddInput("KP_Cooldown", { Text = "Cooldown (s)", Default = "1", Numeric = true, ClearTextOnFocus = false, Callback = function(v) killerParryCooldown = tonumber(v) or 1 end })
+KPBox:AddInput("KP_Range",    { Text = "Circle Range (studs)", Default = "15", Numeric = true, ClearTextOnFocus = false, Callback = function(v) killerParryRange    = tonumber(v) or 15 end })
+KPBox:AddInput("KP_Delay",    { Text = "Delay (0 = instant)", Default = "0",  Numeric = true, ClearTextOnFocus = false, Callback = function(v) killerParryDelay    = tonumber(v) or 0  end })
+KPBox:AddInput("KP_Cooldown", { Text = "Cooldown (s)",        Default = "1",  Numeric = true, ClearTextOnFocus = false, Callback = function(v) killerParryCooldown = tonumber(v) or 1  end })
 KPBox:AddToggle("KP_Visual", { Text = "Show Range Circle", Default = true, Callback = function(v) killerParryVisualOn = v end })
 KPBox:AddLabel("KP_Status",      { Text = "Status: Standby", DoesWrap = false })
 KPBox:AddLabel("KP_LastTrigger", { Text = "Last trigger: None", DoesWrap = false })
 
--- GEN
-Tabs.Gen:AddGroupbox({ Side="Left", Name="Generator", IconName="settings" }):AddButton({
-    Text="Generator Button", Func=function() loadstring(game:HttpGet("https://pastebin.com/raw/tPWnvGj6"))() end
+local NoliBox = Tabs.Killer:AddGroupbox({ Side = "Right", Name = "Noli Void Rush", IconName = "wind" })
+NoliBox:AddDropdown("NOLI_Mode", {
+    Values  = { "Off", "Subtle", "Smooth", "Car" },
+    Default = "Off",
+    Text    = "Steering Mode",
+    Tooltip = "Subtle = a little more controllable, not obvious\nSmooth = clearly better curved steering\nCar    = instant arcade turn, point and go\n\nRequires 'require' support. Applies next Noli spawn.",
+    Callback = function(v)
+        noliVoidRushMode = v
+        local ok = applyNoliVoidRush(v)
+        pcall(function()
+            Library:Notify({
+                Title       = "Noli Void Rush",
+                Description = ok
+                    and ("Mode set to " .. v .. " — applies next Noli spawn")
+                    or  "Noli config not loaded (executor lacks 'require')",
+                Time        = 3,
+            })
+        end)
+    end,
+})
+NoliBox:AddLabel("NOLI_Status", { Text = "Noli config: scanning...", DoesWrap = true })
+
+task.spawn(function()
+    while task.wait(2) do
+        pcall(function()
+            if noliConfig then
+                Options.NOLI_Status:SetText("Noli config: loaded ✓")
+            else
+                Options.NOLI_Status:SetText("Noli config: not found (executor may not support 'require')")
+            end
+        end)
+    end
+end)
+
+local DashBox = Tabs.Killer:AddGroupbox({ Side = "Right", Name = "c00lkidd Dash", IconName = "zap" })
+DashBox:AddToggle("DASH_On", {
+    Text    = "Controllable Dash",
+    Default = false,
+    Tooltip = "Steers c00lkidd's dash in your movement direction (or camera direction while standing still).",
+    Callback = function(v) controllableDashEnabled = v end,
+})
+
+-- GENERATOR TAB
+local GenL = Tabs.Gen:AddGroupbox({ Side = "Left", Name = "Auto Generator", IconName = "settings" })
+GenL:AddToggle("GEN_Auto", {
+    Text    = "Auto Generator",
+    Default = false,
+    Tooltip = "Auto-completes generators within ~6.7 studs while the puzzle UI is open. Overlay blocks manual input while it runs.",
+    Callback = function(v) autoGenEnabled = v end,
+})
+GenL:AddSlider("GEN_Cooldown", {
+    Text     = "Cooldown Between Completions",
+    Default  = 4, Min = 1.5, Max = 8, Rounding = 2,
+    Callback = function(v) autoGenCooldown = v end,
+})
+GenL:AddToggle("GEN_SpeedUp", {
+    Text    = "Speed Up When Nobody's Near",
+    Default = false,
+    Tooltip = "Drops cooldown to 1.5s when no other player is within 32 studs.",
+    Callback = function(v) autoGenSpeedUp = v end,
+})
+
+local GenR = Tabs.Gen:AddGroupbox({ Side = "Right", Name = "Grid Override", IconName = "grid" })
+GenR:AddToggle("GEN_GridOverride", {
+    Text    = "Override Grid Size",
+    Default = false,
+    Tooltip = "Attempts to hook FlowGame to force this grid size. Requires 'require' support.",
+    Callback = function(v) autoGenGridOverride = v end,
+})
+GenR:AddSlider("GEN_GridSize", {
+    Text     = "Grid Size",
+    Default  = 6, Min = 4, Max = 12, Rounding = 0,
+    Callback = function(v) autoGenGridSize = v; autoGenCurrentGrid = v end,
 })
 
 -- MISC
@@ -1459,8 +1877,6 @@ task.spawn(function()
         end
     end
 end)
-
-updateKillerParryAnims("116618003477002,111918351126361,108018357044094,83745199070305,133491532453922,90499469533503")
 
 -- M1 RECOVERY TRACKER
 RunService.RenderStepped:Connect(function()
@@ -1646,7 +2062,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- FLICK TRACKER
+-- FLICK TRACKER (typo fixed: flickDegPerSecThreshold)
 RunService.RenderStepped:Connect(function(dt)
     if dt <= 0 then return end
     local folder = getKillersFolder()
@@ -1665,7 +2081,7 @@ RunService.RenderStepped:Connect(function(dt)
             local rawAngVel = (angle / math.max(dt, 1e-6)) * sign
             st.angVel = (st.angVel or 0) * 0.78 + rawAngVel * 0.22
             st.prevLook = currLook
-            if flickProtectionEnabled and math.abs(rawAngVel) * (180 / math.pi) > flickDegSecThreshold then
+            if flickProtectionEnabled and math.abs(rawAngVel) * (180 / math.pi) > flickDegPerSecThreshold then
                 flickData[k] = { lastFlickTick = tick() }
             end
             killerState[k] = st
@@ -1700,7 +2116,7 @@ task.spawn(function()
     end
 end)
 
--- HDT BLOCK-ANIM TRIGGER (never for killers)
+-- HDT BLOCK-ANIM TRIGGER
 RunService.RenderStepped:Connect(function()
     if not hitboxDraggingTech then return end
     if isHelpless() then return end
@@ -1750,6 +2166,17 @@ task.spawn(function()
                 end
             end
         end
+        if espGeneratorsActive and hideCompletedGens then
+            for _, obj in ipairs(Workspace:GetDescendants()) do
+                if obj.Name == "Generator" and obj:IsA("Model") then
+                    local prog = obj:FindFirstChild("Progress")
+                    if prog and prog.Value >= 100 then
+                        local h = obj:FindFirstChild("esp_g"); if h then h:Destroy() end
+                        local bb = obj:FindFirstChild("esp_g_bb"); if bb then bb:Destroy() end
+                    end
+                end
+            end
+        end
     end
 end)
 
@@ -1789,7 +2216,7 @@ RunService.RenderStepped:Connect(function()
     _blockPrevPlaying = currentPlaying
 end)
 
--- KILLER AUTO-PARRY DETECTION (survivors only, ID **or** name)
+-- KILLER AUTO-PARRY DETECTION (survivors only, ID OR name)
 RunService.Heartbeat:Connect(function()
     if not killerAutoParryEnabled then return end
     local myKiller = getMyKillerName()
@@ -1866,4 +2293,12 @@ RunService.RenderStepped:Connect(function()
     end
     killerParryRangeVisual.Radius = killerParryRange
     killerParryRangeVisual.CFrame = CFrame.new(0, -(myRoot.Size.Y / 2 + 0.05), 0) * CFrame.Angles(math.rad(90), 0, 0)
+end)
+
+-- AIM RENDER LOOP
+RunService.RenderStepped:Connect(function()
+    if not aimState.Enabled then return end
+    if not aimEventActive then return end
+    if not aimTargetHRP or not aimTargetHRP.Parent then return end
+    applyAimTo(predictAimPos(aimTargetHRP), aimState.AimMode)
 end)
