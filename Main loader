@@ -1,56 +1,34 @@
 repeat task.wait() until game:IsLoaded()
 
+-- ==========================================
+-- SPLASH
+-- ==========================================
 local function showSplash()
     local TweenService = game:GetService("TweenService")
     local PlayerGui    = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
     local gui = Instance.new("ScreenGui")
-    gui.Name = "SlashsakenSplash"
-    gui.ResetOnSpawn = false
-    gui.IgnoreGuiInset = true
-    gui.DisplayOrder = 999999
-    gui.Parent = PlayerGui
+    gui.Name = "SlashsakenSplash"; gui.ResetOnSpawn = false
+    gui.IgnoreGuiInset = true; gui.DisplayOrder = 999999; gui.Parent = PlayerGui
     local bg = Instance.new("Frame")
-    bg.Size = UDim2.new(1, 0, 1, 0)
-    bg.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    bg.BackgroundTransparency = 1
-    bg.BorderSizePixel = 0
-    bg.Parent = gui
+    bg.Size = UDim2.new(1,0,1,0); bg.BackgroundColor3 = Color3.fromRGB(0,0,0)
+    bg.BackgroundTransparency = 1; bg.BorderSizePixel = 0; bg.Parent = gui
     local card = Instance.new("Frame")
-    card.AnchorPoint = Vector2.new(0.5, 0.5)
-    card.Position    = UDim2.new(0.5, 0, 0.5, 0)
-    card.Size        = UDim2.new(0, 340, 0, 230)
-    card.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
-    card.BackgroundTransparency = 1
-    card.BorderSizePixel = 0
-    card.Parent = gui
-    local corner = Instance.new("UICorner"); corner.CornerRadius = UDim.new(0, 12); corner.Parent = card
-    local stroke = Instance.new("UIStroke"); stroke.Color = Color3.fromRGB(220, 50, 50); stroke.Thickness = 2; stroke.Transparency = 1; stroke.Parent = card
-    local grad = Instance.new("UIGradient")
-    grad.Color = ColorSequence.new{ ColorSequenceKeypoint.new(0, Color3.fromRGB(30,30,40)), ColorSequenceKeypoint.new(1, Color3.fromRGB(15,15,22)) }
-    grad.Rotation = 90; grad.Parent = card
-    local img1 = Instance.new("ImageLabel")
-    img1.AnchorPoint = Vector2.new(1, 0.5); img1.Position = UDim2.new(0.5, -6, 0.38, 0)
-    img1.Size = UDim2.new(0, 110, 0, 110); img1.BackgroundTransparency = 1
-    img1.Image = "rbxassetid://130582019929746"; img1.ImageTransparency = 1
-    img1.ScaleType = Enum.ScaleType.Fit; img1.Parent = card
-    local img2 = Instance.new("ImageLabel")
-    img2.AnchorPoint = Vector2.new(0, 0.5); img2.Position = UDim2.new(0.5, 6, 0.38, 0)
-    img2.Size = UDim2.new(0, 110, 0, 110); img2.BackgroundTransparency = 1
-    img2.Image = "rbxassetid://76765831712854"; img2.ImageTransparency = 1
-    img2.ScaleType = Enum.ScaleType.Fit; img2.Parent = card
+    card.AnchorPoint = Vector2.new(0.5,0.5); card.Position = UDim2.new(0.5,0,0.5,0)
+    card.Size = UDim2.new(0,340,0,230); card.BackgroundColor3 = Color3.fromRGB(18,18,24)
+    card.BackgroundTransparency = 1; card.BorderSizePixel = 0; card.Parent = gui
+    local corner = Instance.new("UICorner"); corner.CornerRadius = UDim.new(0,12); corner.Parent = card
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(220,50,50); stroke.Thickness = 2; stroke.Transparency = 1; stroke.Parent = card
     local title = Instance.new("TextLabel")
-    title.AnchorPoint = Vector2.new(0.5, 0.5); title.Position = UDim2.new(0.5, 0, 0.82, 0)
-    title.Size = UDim2.new(1, -20, 0, 26); title.BackgroundTransparency = 1
+    title.AnchorPoint = Vector2.new(0.5,0.5); title.Position = UDim2.new(0.5,0,0.82,0)
+    title.Size = UDim2.new(1,-20,0,26); title.BackgroundTransparency = 1
     title.Font = Enum.Font.GothamBold; title.TextSize = 18; title.TextColor3 = Color3.fromRGB(255,255,255)
     title.TextTransparency = 1; title.Text = "Loading Slashsaken..."; title.Parent = card
-    pcall(function() game:GetService("ContentProvider"):PreloadAsync({"rbxassetid://130582019929746","rbxassetid://76765831712854"}) end)
     local IN  = TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
     local OUT = TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
     TweenService:Create(bg,     IN, { BackgroundTransparency = 0.35 }):Play()
     TweenService:Create(card,   IN, { BackgroundTransparency = 0.03 }):Play()
     TweenService:Create(stroke, IN, { Transparency = 0 }):Play()
-    TweenService:Create(img1,   IN, { ImageTransparency = 0 }):Play()
-    TweenService:Create(img2,   IN, { ImageTransparency = 0 }):Play()
     TweenService:Create(title,  IN, { TextTransparency = 0 }):Play()
     task.delay(2.4, function()
         pcall(function()
@@ -61,19 +39,16 @@ local function showSplash()
         TweenService:Create(bg,     OUT, { BackgroundTransparency = 1 }):Play()
         TweenService:Create(card,   OUT, { BackgroundTransparency = 1 }):Play()
         TweenService:Create(stroke, OUT, { Transparency = 1 }):Play()
-        TweenService:Create(img1,   OUT, { ImageTransparency = 1 }):Play()
-        TweenService:Create(img2,   OUT, { ImageTransparency = 1 }):Play()
         TweenService:Create(title,  OUT, { TextTransparency = 1 }):Play()
         task.delay(0.5, function() pcall(function() gui:Destroy() end) end)
     end)
 end
 showSplash()
 
-local repo = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/"
-local Library      = loadstring(game:HttpGet(repo .. "Library.lua"))()
-local ThemeManager = loadstring(game:HttpGet(repo .. "addons/ThemeManager.lua"))()
-local SaveManager  = loadstring(game:HttpGet(repo .. "addons/SaveManager.lua"))()
-local Options = Library.Options
+-- ==========================================
+-- RAYFIELD GEN 2
+-- ==========================================
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService        = game:GetService("RunService")
@@ -83,10 +58,11 @@ local PlayerGui         = lp:WaitForChild("PlayerGui")
 local Workspace         = game:GetService("Workspace")
 local Lighting          = game:GetService("Lighting")
 local TextChatService   = game:GetService("TextChatService")
-local UserInputService  = game:GetService("UserInputService")
 local testRemote        = ReplicatedStorage:WaitForChild("Modules"):WaitForChild("Network"):WaitForChild("Network"):WaitForChild("RemoteEvent")
 
+-- ==========================================
 -- STATE
+-- ==========================================
 local wallCheckEnabled       = false
 local facingCheckEnabled     = true
 local customFacingDot        = 0.3
@@ -167,7 +143,9 @@ local autoGenGridSize        = 6
 local autoGenOverlayTemplate = nil
 local hideCompletedGens      = true
 
+-- ==========================================
 -- CONSTANTS
+-- ==========================================
 local PARRY_KEYWORDS = { "slash", "flintlock", "one shot", "oneshot", "one-shot", "hatchet", "parry" }
 local AIM_KEYWORDS   = { "slash", "parry punch", "one shot", "oneshot", "gun explosion", "sacrificial dagger", "backstab", "hatchet" }
 local AIM_PING_KEYWORDS = { "gun explosion" }
@@ -177,12 +155,8 @@ local HARDCODED_KILLER_PARRY_ANIMS = {
     "133491532453922","90499469533503","72722244508749","96959123077498",
     "95802026624883","140671644163156","100926346851492",
 }
-local GUEST_PARRY_ANIMS = {
-    "72722244508749","96959123077498","95802026624883","140671644163156","100926346851492",
-}
-local blockAnimIds = {
-    "72722244508749","96959123077498","95802026624883","140671644163156","100926346851492",
-}
+local GUEST_PARRY_ANIMS = { "72722244508749","96959123077498","95802026624883","140671644163156","100926346851492" }
+local blockAnimIds = { "72722244508749","96959123077498","95802026624883","140671644163156","100926346851492" }
 local punchAnimIds = {
     "87259391926321","99100240941590","72685103823181","81905101227053","113936304594883",
     "140703210927645","136007065400978","129843313690921","86709774283672","108807732150251",
@@ -238,7 +212,41 @@ local NOLI_MODES = {
     Car    = { InitialTurnDuration = 0.01, TurnSpeed = 10000, InitialTurnMult = 1000 },
 }
 
+-- ==========================================
+-- HELPERS
+-- ==========================================
+local function rayfieldNotify(title, content, dur)
+    pcall(function()
+        Rayfield:Notify({
+            Title = title,
+            Content = content,
+            Duration = dur or 3,
+            Image = 4483362458,
+        })
+    end)
+end
+
+-- Compatible label updater across Rayfield versions
+local function updateLabel(elem, text)
+    if not elem then return end
+    local str = tostring(text)
+    pcall(function()
+        if typeof(elem) == "Instance" then
+            elem.Text = str
+        elseif elem.Element then
+            if typeof(elem.Element) == "Instance" then
+                elem.Element.Text = str
+            elseif elem.Element.TextLabel then
+                elem.Element.TextLabel.Text = str
+            end
+        end
+        if elem.Set then elem:Set(str) end
+    end)
+end
+
+-- ==========================================
 -- ROLE HELPERS
+-- ==========================================
 local function getMyKillerName()
     local PlayersFolder = Workspace:FindFirstChild("Players")
     if not PlayersFolder then return nil end
@@ -274,7 +282,6 @@ local function isM1LockedOut()
     return (tick() - lastM1Time) < M1_RECOVERY
 end
 
--- FOLDER GETTERS
 local function getKillersFolder()
     local p = Workspace:FindFirstChild("Players")
     return p and p:FindFirstChild("Killers")
@@ -311,7 +318,9 @@ local function getSurvivorCharacters()
     return list
 end
 
+-- ==========================================
 -- PARRY HELPERS
+-- ==========================================
 local function fireKillerAbility(name)
     if not name or name == "" then return end
     local bytes = { 3, #name, 0, 0, 0 }
@@ -337,12 +346,16 @@ local function updateKillerParryAnims()
     for _, id in ipairs(HARDCODED_KILLER_PARRY_ANIMS) do killerParryAnimIds[id] = true end
 end
 updateKillerParryAnims()
-local function setKillerParryLastLabel(txt) pcall(function() Options.KP_LastTrigger:SetText("Last trigger: " .. tostring(txt)) end) end
+
+local KP_StatusLabel, KP_LastTriggerLabel
+local function setKillerParryLastLabel(txt)
+    if KP_LastTriggerLabel then updateLabel(KP_LastTriggerLabel, "Last trigger: " .. tostring(txt)) end
+end
 local function setKillerParryStatus(txt)
     local now = tick()
     if now - killerParryLastStatusTime < 1 then return end
     killerParryLastStatusTime = now
-    pcall(function() Options.KP_Status:SetText("Status: " .. tostring(txt)) end)
+    if KP_StatusLabel then updateLabel(KP_StatusLabel, "Status: " .. tostring(txt)) end
 end
 local function nameMatchesParryKeyword(name)
     if not name or name == "" then return false end
@@ -353,7 +366,9 @@ local function nameMatchesParryKeyword(name)
     return false
 end
 
+-- ==========================================
 -- NOLI
+-- ==========================================
 local function findConfigKey(cfg, name, seen)
     if type(cfg) ~= "table" then return nil end
     seen = seen or {}
@@ -407,7 +422,9 @@ task.spawn(function()
     if loaded and noliVoidRushMode ~= "Off" then applyNoliVoidRush(noliVoidRushMode) end
 end)
 
+-- ==========================================
 -- FACING MATH
+-- ==========================================
 local function getFacingCircleInfo(killerHRP)
     local dot   = math.clamp(customFacingDot or 0.3, -1, 1)
     local angle = math.acos(dot)
@@ -423,7 +440,6 @@ local function isInBlockZone(myRoot, killerHRP)
     return (myRoot.Position - center).Magnitude <= radius
 end
 
--- FLICK
 local function isKillerFlicking(killer, myRoot, killerHRP)
     if not flickProtectionEnabled then return false end
     if (killerHRP.Position - myRoot.Position).Magnitude > flickRange then return false end
@@ -432,7 +448,9 @@ local function isKillerFlicking(killer, myRoot, killerHRP)
     return (tick() - fd.lastFlickTick) < flickWindow
 end
 
+-- ==========================================
 -- HDT
+-- ==========================================
 local function beginDragIntoKiller(killerModel)
     if isLocalPlayerKiller() then return end
     if _hitboxDraggingDebounce then return end
@@ -476,7 +494,9 @@ local function beginDragIntoKiller(killerModel)
     task.delay(HDT_DURATION, function() if _hitboxDraggingDebounce then _hitboxDraggingDebounce = false end end)
 end
 
+-- ==========================================
 -- BLOCK
+-- ==========================================
 local cachedCooldown
 local function isBlockOnCooldown()
     if tick() < blockCooldownUntil then return true end
@@ -493,7 +513,7 @@ local function fireRemoteBlock()
     })
     lastBlockFireTime  = tick()
     blockCooldownUntil = tick() + BLOCK_COOLDOWN
-    pcall(function() Library:Notify({ Title = "Auto Block", Description = "Block fired — 27s cooldown", Time = 2 }) end)
+    rayfieldNotify("Auto Block", "Block fired — 27s cooldown", 2)
     if hitboxDraggingTech then
         task.spawn(function()
             local nearest = getNearestKillerModel()
@@ -517,7 +537,9 @@ local function fireRemoteClone()
     })
 end
 
+-- ==========================================
 -- CHAT + LOS
+-- ==========================================
 local function sendChatMessage(text)
     if not text or text:match("^%s*$") then return end
     pcall(function() TextChatService.TextChannels.RBXGeneral:SendAsync(text) end)
@@ -537,7 +559,9 @@ local function hasLineOfSight(targetPart)
     return Workspace:Raycast(myRoot.Position, targetPart.Position - myRoot.Position, rp) == nil
 end
 
+-- ==========================================
 -- UI REFS
+-- ==========================================
 local cachedBlockBtn, cachedPunchBtn
 local function refreshUIRefs()
     local main = PlayerGui:FindFirstChild("MainUI")
@@ -561,7 +585,9 @@ end
 refreshAnimator()
 lp.CharacterAdded:Connect(function() task.wait(0.5); refreshAnimator(); refreshUIRefs() end)
 
+-- ==========================================
 -- VISUALS
+-- ==========================================
 local function addFacingVisual(killer)
     if not killer or not killer:IsA("Model") or facingVisuals[killer] then return end
     local hrp = killer:FindFirstChild("HumanoidRootPart")
@@ -589,7 +615,9 @@ local function removeKillerCircle(killer)
     if detectionCircles[killer] then detectionCircles[killer]:Destroy(); detectionCircles[killer] = nil end
 end
 
+-- ==========================================
 -- SOUND HOOK
+-- ==========================================
 local function extractNumericSoundId(sound)
     if not sound or not sound.SoundId then return nil end
     local sid = tostring(sound.SoundId)
@@ -660,7 +688,9 @@ local function hookSound(sound)
     if sound.IsPlaying then fire() end
 end
 
+-- ==========================================
 -- INVIS
+-- ==========================================
 local invisAnimId = "75804462760596"
 local invisRunning, invisThread, invisCurrent = false, nil, nil
 function StartInvisibility()
@@ -683,7 +713,9 @@ function StopInvisibility()
     if invisCurrent then invisCurrent:Stop(); invisCurrent = nil end
 end
 
+-- ==========================================
 -- ESP
+-- ==========================================
 local killerHighlights, survivorHighlights = {}, {}
 local espKillerActive, espSurvivorActive = false, false
 local espMedkitActive, espBloxyActive, espGeneratorsActive = false, false, false
@@ -766,14 +798,15 @@ local function espDoGenerators(on)
     end
 end
 
--- STAMINA (safe)
+-- ==========================================
+-- STAMINA (safe load)
+-- ==========================================
 local sprintModule
 do
     local ok, result = pcall(function()
         return require(ReplicatedStorage.Systems.Character.Game.Sprinting)
     end)
-    if ok and type(result) == "table" then
-        sprintModule = result
+    if ok and type(result) == "table" then sprintModule = result
     else
         warn("[Slashsaken] Sprinting module unavailable — using safe defaults")
         sprintModule = { MaxStamina = 100, SprintSpeed = 20, StaminaGain = 5, StaminaDrain = 1, StaminaRegenDelay = 0.5 }
@@ -802,7 +835,9 @@ local function setStamina()
     end)
 end
 
+-- ==========================================
 -- AIM MODULE
+-- ==========================================
 local aimAssets = ReplicatedStorage:FindFirstChild("Assets")
 local function norm(s) return (string.lower(tostring(s or "")):gsub("[^%a]", "")) end
 local function matchesAny(name, keywords)
@@ -1009,7 +1044,9 @@ lp.CharacterAdded:Connect(function(c)
     task.spawn(attachAimToChar, c)
 end)
 
+-- ==========================================
 -- GENERATOR SYSTEM
+-- ==========================================
 local function isAnyPlayerNear(distance)
     local char = lp.Character
     local root = char and char:FindFirstChild("HumanoidRootPart")
@@ -1136,7 +1173,9 @@ task.spawn(function()
     end
 end)
 
+-- ==========================================
 -- C00LKIDD DASH
+-- ==========================================
 local function setupControllableDash(char)
     if not char then return end
     local root = char:FindFirstChild("HumanoidRootPart") or char:WaitForChild("HumanoidRootPart", 5)
@@ -1187,113 +1226,133 @@ lp.CharacterAdded:Connect(function()
 end)
 
 -- ==========================================
--- WINDOW (created BEFORE tabs; show scheduled immediately)
+-- RAYFIELD WINDOW
 -- ==========================================
-local Window = Library:CreateWindow({
-    Title = "Slashsaken [Beta]",
-    Footer = "By viltrumite",
-    NotifySide = "Right",
-    ShowCustomCursor = true,
-    AutoShow = false,
+local Window = Rayfield:CreateWindow({
+    Name = "Slashsaken [Beta]",
+    Icon = 4483362458,
+    LoadingTitle = "Slashsaken",
+    LoadingSubtitle = "by viltrumite",
+    Theme = "Default",
+    DisableRayfieldPrompts = false,
+    DisableBuildWarnings = false,
+    ConfigurationSaving = {
+        Enabled = true,
+        FolderName = "Slashsaken",
+        FileName = "Config",
+    },
+    Discord = { Enabled = false },
+    KeySystem = false,
 })
 
--- Schedule show NOW so a tab content error can't prevent the GUI from appearing
-task.delay(3, function()
-    pcall(function() Library:Toggle() end)
-    pcall(function() Window:Show() end)
-end)
-
-local Tabs = {
-    Esp        = Window:AddTab("Esp",           "monitor"),
-    Stam       = Window:AddTab("Stam",          "zap"),
-    AutoBlock  = Window:AddTab("Auto Block",    "shield"),
-    FacingChk  = Window:AddTab("Facing Check",  "eye"),
-    Notice     = Window:AddTab("Notice",        "info"),
-    AutoPunch  = Window:AddTab("Auto Punch",    "sword"),
-    Aim        = Window:AddTab("Aim",           "crosshair"),
-    Tech       = Window:AddTab("Techs",         "cpu"),
-    Killer     = Window:AddTab("Killer",        "skull"),
-    Gen        = Window:AddTab("Generator",     "settings"),
-    Misc       = Window:AddTab("Misc",          "box"),
-    ["UI Settings"] = Window:AddTab("UI Settings", "settings"),
-}
+-- ==========================================
+-- TABS
+-- ==========================================
+local EspTab       = Window:CreateTab("Esp")
+local StamTab      = Window:CreateTab("Stam")
+local AutoBlockTab = Window:CreateTab("Auto Block")
+local FacingTab    = Window:CreateTab("Facing Check")
+local PunchTab     = Window:CreateTab("Auto Punch")
+local AimTab       = Window:CreateTab("Aim")
+local TechTab      = Window:CreateTab("Techs")
+local KillerTab    = Window:CreateTab("Killer")
+local GenTab       = Window:CreateTab("Generator")
+local NoticeTab    = Window:CreateTab("Notice")
+local MiscTab      = Window:CreateTab("Misc")
 
 -- ESP
-local VisL = Tabs.Esp:AddGroupbox({ Side="Left", Name="Players", IconName="users" })
-VisL:AddToggle("ESP_Killer",   { Text="Killer ESP",    Default=false, Callback=function(v) espKillerActive=v end })
-VisL:AddToggle("ESP_Survivor", { Text="Survivors ESP", Default=false, Callback=function(v) espSurvivorActive=v end })
-local VisR = Tabs.Esp:AddGroupbox({ Side="Right", Name="Items & Gens", IconName="package" })
-VisR:AddToggle("ESP_Medkit",  { Text="Medkit ESP", Default=false, Callback=function(v)
+EspTab:CreateSection("Players")
+EspTab:CreateToggle({ Name="Killer ESP", CurrentValue=false, Flag="ESP_Killer", Callback=function(v) espKillerActive=v end })
+EspTab:CreateToggle({ Name="Survivors ESP", CurrentValue=false, Flag="ESP_Survivor", Callback=function(v) espSurvivorActive=v end })
+EspTab:CreateSection("Items & Gens")
+EspTab:CreateToggle({ Name="Medkit ESP", CurrentValue=false, Flag="ESP_Medkit", Callback=function(v)
     espMedkitActive=v
     if v then scanItems("Medkit") else medkitHighlights=clearList(medkitHighlights) end
 end })
-VisR:AddToggle("ESP_Bloxy",   { Text="BloxyCola ESP", Default=false, Callback=function(v)
+EspTab:CreateToggle({ Name="BloxyCola ESP", CurrentValue=false, Flag="ESP_Bloxy", Callback=function(v)
     espBloxyActive=v
     if v then scanItems("BloxyCola") else bloxyHighlights=clearList(bloxyHighlights) end
 end })
-VisR:AddToggle("ESP_Generators", { Text="Generators ESP", Default=false, Callback=function(v)
+EspTab:CreateToggle({ Name="Generators ESP", CurrentValue=false, Flag="ESP_Generators", Callback=function(v)
     espGeneratorsActive=v; espDoGenerators(v)
 end })
-VisR:AddToggle("ESP_HideCompleted", { Text="Hide Completed Generators", Default=true, Callback=function(v) hideCompletedGens=v end })
+EspTab:CreateToggle({ Name="Hide Completed Generators", CurrentValue=true, Flag="ESP_HideCompleted", Callback=function(v) hideCompletedGens=v end })
 
 -- STAM
-local StamL = Tabs.Stam:AddGroupbox({ Side="Left", Name="Stamina", IconName="zap" })
-StamL:AddToggle("InfStamina", { Text="Infinite Stamina", Default=false, Callback=function(v)
-    if v then setStamina() else infinityStaminaActive = false; if staminaThread then task.cancel(staminaThread); staminaThread=nil end end
+StamTab:CreateSection("Stamina")
+StamTab:CreateToggle({ Name="Infinite Stamina", CurrentValue=false, Flag="InfStamina", Callback=function(v)
+    if v then setStamina() else infinityStaminaActive=false; if staminaThread then task.cancel(staminaThread); staminaThread=nil end end
 end })
-StamL:AddSlider("MaxStaminaSlider", { Text="Max Stamina", Default=maxStaminaValue, Min=1, Max=1000, Rounding=0, Callback=function(v) maxStaminaValue=v; sprintModule.MaxStamina=v end })
-StamL:AddSlider("SprintSpeedSlider", { Text="Sprint Speed", Default=sprintSpeedValue, Min=1, Max=30, Rounding=0, Callback=function(v) sprintSpeedValue=v; sprintModule.SprintSpeed=v end })
-local StamR = Tabs.Stam:AddGroupbox({ Side="Right", Name="Advanced", IconName="activity" })
-StamR:AddSlider("StaminaGainSlider", { Text="Stamina Gain", Default=staminaGainValue, Min=1, Max=1000, Rounding=0, Callback=function(v) staminaGainValue=v; sprintModule.StaminaGain=v end })
-StamR:AddSlider("StaminaDrainSlider", { Text="Stamina Drain", Default=staminaDrainValue, Min=0, Max=1000, Rounding=0, Callback=function(v) staminaDrainValue=v; sprintModule.StaminaDrain=v end })
-StamR:AddSlider("RegenDelaySlider", { Text="Regen Delay", Default=regenDelayValue, Min=0, Max=10, Rounding=1, Callback=function(v) regenDelayValue=v; sprintModule.StaminaRegenDelay=v end })
+StamTab:CreateSlider({ Name="Max Stamina", Range={1,1000}, Increment=1, CurrentValue=maxStaminaValue, Flag="MaxStaminaSlider",
+    Callback=function(v) maxStaminaValue=v; sprintModule.MaxStamina=v end })
+StamTab:CreateSlider({ Name="Sprint Speed", Range={1,30}, Increment=1, CurrentValue=sprintSpeedValue, Flag="SprintSpeedSlider",
+    Callback=function(v) sprintSpeedValue=v; sprintModule.SprintSpeed=v end })
+StamTab:CreateSection("Advanced")
+StamTab:CreateSlider({ Name="Stamina Gain", Range={1,1000}, Increment=1, CurrentValue=staminaGainValue, Flag="StaminaGainSlider",
+    Callback=function(v) staminaGainValue=v; sprintModule.StaminaGain=v end })
+StamTab:CreateSlider({ Name="Stamina Drain", Range={0,1000}, Increment=1, CurrentValue=staminaDrainValue, Flag="StaminaDrainSlider",
+    Callback=function(v) staminaDrainValue=v; sprintModule.StaminaDrain=v end })
+StamTab:CreateSlider({ Name="Regen Delay", Range={0,10}, Increment=0.1, CurrentValue=regenDelayValue, Flag="RegenDelaySlider",
+    Callback=function(v) regenDelayValue=v; sprintModule.StaminaRegenDelay=v end })
 
 -- AUTO BLOCK
-local ABL = Tabs.AutoBlock:AddGroupbox({ Side="Left", Name="Auto Block", IconName="shield" })
-ABL:AddToggle("AB_CircleBlock", { Text="Auto Block", Default=true, Tooltip="Instant block. 27s ability cooldown + 0.2s anti-spam.", Callback=function(v) autoBlockOn=v end })
-ABL:AddToggle("AB_AudioOn", { Text="Auto Block (Sound React)", Default=false, Callback=function(v) autoBlockAudioOn=v end })
-ABL:AddToggle("AB_GhostBlock", { Text="Ghost Block", Default=false, Callback=function(v) if v then StartInvisibility() else StopInvisibility() end end })
-ABL:AddInput("AB_DetectRange", { Text="Detection Range (studs)", Default="18", Numeric=true, ClearTextOnFocus=false, Callback=function(v) detectionRange = tonumber(v) or 18 end })
-ABL:AddDivider()
-ABL:AddToggle("AB_M1Lockout", { Text="M1 Recovery Lockout", Default=true, Callback=function(v) m1LockoutEnabled=v end })
-ABL:AddInput("AB_M1Recovery", { Text="M1 Recovery Duration (s)", Default="0.4", Numeric=true, ClearTextOnFocus=false, Callback=function(v) M1_RECOVERY = tonumber(v) or 0.4 end })
-local ABR = Tabs.AutoBlock:AddGroupbox({ Side="Right", Name="Modes", IconName="shield-check" })
-ABR:AddToggle("AB_BlockMode", { Text="Auto Block (Guest 1337)", Default=true, Callback=function(v) autoblockToggles["Block"]=v end })
-ABR:AddToggle("AB_CloneMode", { Text="Auto Clone (007n7)", Default=false, Callback=function(v) autoblockToggles["Clone"]=v end })
-ABR:AddDivider()
-ABR:AddToggle("AB_MsgWhenBlock", { Text="Message When Blocking", Default=false, Callback=function(v) messageWhenAutoBlockOn=v end })
-ABR:AddInput("AB_BlockMsg", { Text="The message", Default="", Placeholder="Block", ClearTextOnFocus=false, Callback=function(v) messageWhenAutoBlock=v end })
+AutoBlockTab:CreateSection("Auto Block")
+AutoBlockTab:CreateToggle({ Name="Auto Block", CurrentValue=true, Flag="AB_CircleBlock",
+    Callback=function(v) autoBlockOn=v end })
+AutoBlockTab:CreateToggle({ Name="Auto Block (Sound React)", CurrentValue=false, Flag="AB_AudioOn",
+    Callback=function(v) autoBlockAudioOn=v end })
+AutoBlockTab:CreateToggle({ Name="Ghost Block", CurrentValue=false, Flag="AB_GhostBlock",
+    Callback=function(v) if v then StartInvisibility() else StopInvisibility() end end })
+AutoBlockTab:CreateSlider({ Name="Detection Range (studs)", Range={1,50}, Increment=1, CurrentValue=18, Flag="AB_DetectRange",
+    Callback=function(v) detectionRange=v end })
+AutoBlockTab:CreateToggle({ Name="M1 Recovery Lockout", CurrentValue=true, Flag="AB_M1Lockout",
+    Callback=function(v) m1LockoutEnabled=v end })
+AutoBlockTab:CreateSlider({ Name="M1 Recovery Duration", Range={0.05,1}, Increment=0.05, CurrentValue=0.4, Suffix="s", Flag="AB_M1Recovery",
+    Callback=function(v) M1_RECOVERY=v end })
+AutoBlockTab:CreateSection("Modes")
+AutoBlockTab:CreateToggle({ Name="Auto Block (Guest 1337)", CurrentValue=true, Flag="AB_BlockMode",
+    Callback=function(v) autoblockToggles["Block"]=v end })
+AutoBlockTab:CreateToggle({ Name="Auto Clone (007n7)", CurrentValue=false, Flag="AB_CloneMode",
+    Callback=function(v) autoblockToggles["Clone"]=v end })
+AutoBlockTab:CreateToggle({ Name="Message When Blocking", CurrentValue=false, Flag="AB_MsgWhenBlock",
+    Callback=function(v) messageWhenAutoBlockOn=v end })
+AutoBlockTab:CreateInput({ Name="The message", CurrentValue="", PlaceholderText="Message when blocking",
+    RemoveTextAfterFocusLost=false, Flag="AB_BlockMsg",
+    Callback=function(t) messageWhenAutoBlock=t end })
 
 -- FACING
-local FCLeft = Tabs.FacingChk:AddGroupbox({ Side="Left", Name="Facing", IconName="eye" })
-FCLeft:AddToggle("AB_FacingCheck", { Text="Facing Check (forward circle only)", Default=true, Callback=function(v)
-    facingCheckEnabled = v
-    if v then
-        local folder = getKillersFolder()
-        if folder then for _, k in ipairs(folder:GetChildren()) do addFacingVisual(k) end end
-    end
-end })
-FCLeft:AddToggle("AB_FacingVisual", { Text="Facing Visual (yellow/red/green)", Default=true, Callback=function(v)
-    facingVisualOn = v
-    local folder = getKillersFolder()
-    if folder then
-        for _, k in ipairs(folder:GetChildren()) do
-            if v then addFacingVisual(k) else removeFacingVisual(k) end
-        end
-    end
-end })
-FCLeft:AddToggle("AB_DetectVisual", { Text="Giant Circle Visual (auto-block range)", Default=false, Callback=function(v)
-    killerCirclesVisible = v
-    local folder = getKillersFolder()
-    if folder then
-        for _, k in ipairs(folder:GetChildren()) do
-            if v then addKillerCircle(k) else removeKillerCircle(k) end
-        end
-    end
-end })
-FCLeft:AddInput("AB_FacingDot", { Text="Facing DOT (0.3 = 72°, higher = tighter)", Default="0.3", Numeric=true, ClearTextOnFocus=false,
+FacingTab:CreateSection("Facing")
+FacingTab:CreateToggle({ Name="Facing Check (forward circle only)", CurrentValue=true, Flag="AB_FacingCheck",
     Callback=function(v)
-        customFacingDot = tonumber(v) or 0.3
+        facingCheckEnabled = v
+        if v then
+            local folder = getKillersFolder()
+            if folder then for _, k in ipairs(folder:GetChildren()) do addFacingVisual(k) end end
+        end
+    end })
+FacingTab:CreateToggle({ Name="Facing Visual (yellow/red/green)", CurrentValue=true, Flag="AB_FacingVisual",
+    Callback=function(v)
+        facingVisualOn = v
+        local folder = getKillersFolder()
+        if folder then
+            for _, k in ipairs(folder:GetChildren()) do
+                if v then addFacingVisual(k) else removeFacingVisual(k) end
+            end
+        end
+    end })
+FacingTab:CreateToggle({ Name="Giant Circle Visual (auto-block range)", CurrentValue=false, Flag="AB_DetectVisual",
+    Callback=function(v)
+        killerCirclesVisible = v
+        local folder = getKillersFolder()
+        if folder then
+            for _, k in ipairs(folder:GetChildren()) do
+                if v then addKillerCircle(k) else removeKillerCircle(k) end
+            end
+        end
+    end })
+FacingTab:CreateSlider({ Name="Facing DOT (0.3=72°, higher=tighter)", Range={0,1}, Increment=0.05, CurrentValue=0.3, Flag="AB_FacingDot",
+    Callback=function(v)
+        customFacingDot = v
         for killer, visual in pairs(facingVisuals) do
             local hrp = killer:FindFirstChild("HumanoidRootPart")
             if hrp then
@@ -1304,34 +1363,40 @@ FCLeft:AddInput("AB_FacingDot", { Text="Facing DOT (0.3 = 72°, higher = tighter
             end
         end
     end })
-FCLeft:AddToggle("AB_WallCheck", { Text="Wall Check", Default=false, Callback=function(v) wallCheckEnabled=v end })
-
-local FCRight = Tabs.FacingChk:AddGroupbox({ Side="Right", Name="Flick Protection", IconName="wind" })
-FCRight:AddToggle("FP_On", { Text="Enable Flick Protection", Default=false, Callback=function(v) flickProtectionEnabled=v end })
-FCRight:AddInput("FP_Range",     { Text="Flick Range (studs)",    Default="15",   Numeric=true, ClearTextOnFocus=false, Callback=function(v) flickRange = tonumber(v) or 15 end })
-FCRight:AddInput("FP_Threshold", { Text="Flick Threshold (deg/s)", Default="500",  Numeric=true, ClearTextOnFocus=false, Callback=function(v) flickDegPerSecThreshold = tonumber(v) or 500 end })
-FCRight:AddInput("FP_Window",    { Text="Flick Window (s)",        Default="0.25", Numeric=true, ClearTextOnFocus=false, Callback=function(v) flickWindow = tonumber(v) or 0.25 end })
-
--- NOTICE
-Tabs.Notice:AddGroupbox({ Side="Left", Name="Info", IconName="info" }):AddLabel({
-    Text = "Slashsaken [Beta]\n\nBy viltrumite\n\n• Auto Block — instant, 27s cd + 0.2s anti-spam\n• Facing Circle — yellow / red / green (M1 detected)\n• HDT — survivor only, shares 27s cd with Block\n• Killer Auto-Parry — 404Error / RagingPace (hardcoded anim list)\n• Aim — own ability via ID OR name\n• Noli Void Rush — Subtle / Smooth / Car\n• Generator — full ForsakenPlus auto-gen system",
-    DoesWrap = true,
-})
+FacingTab:CreateToggle({ Name="Wall Check", CurrentValue=false, Flag="AB_WallCheck",
+    Callback=function(v) wallCheckEnabled=v end })
+FacingTab:CreateSection("Flick Protection")
+FacingTab:CreateToggle({ Name="Enable Flick Protection", CurrentValue=false, Flag="FP_On",
+    Callback=function(v) flickProtectionEnabled=v end })
+FacingTab:CreateSlider({ Name="Flick Range (studs)", Range={1,50}, Increment=1, CurrentValue=15, Flag="FP_Range",
+    Callback=function(v) flickRange=v end })
+FacingTab:CreateSlider({ Name="Flick Threshold (deg/s)", Range={100,2000}, Increment=50, CurrentValue=500, Flag="FP_Threshold",
+    Callback=function(v) flickDegPerSecThreshold=v end })
+FacingTab:CreateSlider({ Name="Flick Window", Range={0.05,1}, Increment=0.05, CurrentValue=0.25, Suffix="s", Flag="FP_Window",
+    Callback=function(v) flickWindow=v end })
 
 -- AUTO PUNCH
-local APL = Tabs.AutoPunch:AddGroupbox({ Side="Left", Name="Auto Punch", IconName="sword" })
-APL:AddToggle("AP_AutoPunch", { Text="Auto Punch", Default=false, Callback=function(v) autoPunchEventEnabled=v end })
-APL:AddToggle("AP_Aimbot", { Text="Aimbot (aim during your punch)", Default=false, Callback=function(v) MyAnimLockOn=v end })
-APL:AddInput("AP_AimDur", { Text="Aim Lock Duration", Default="0.8", Numeric=true, ClearTextOnFocus=false, Callback=function(v) AIM_WINDOW=tonumber(v) or 0.8 end })
-local APR = Tabs.AutoPunch:AddGroupbox({ Side="Right", Name="Aim Lock Modes", IconName="target" })
-APR:AddToggle("AP_CharLock", { Text="Character Lock", Default=true, Callback=function(v) aimPunchToggles["Character Lock"]=v end })
-APR:AddToggle("AP_CamLock", { Text="Camera Lock", Default=false, Callback=function(v) aimPunchToggles["Camera Lock"]=v end })
+PunchTab:CreateSection("Auto Punch")
+PunchTab:CreateToggle({ Name="Auto Punch", CurrentValue=false, Flag="AP_AutoPunch",
+    Callback=function(v) autoPunchEventEnabled=v end })
+PunchTab:CreateToggle({ Name="Aimbot (aim during your punch)", CurrentValue=false, Flag="AP_Aimbot",
+    Callback=function(v) MyAnimLockOn=v end })
+PunchTab:CreateSlider({ Name="Aim Lock Duration", Range={0.1,3}, Increment=0.1, CurrentValue=0.8, Suffix="s", Flag="AP_AimDur",
+    Callback=function(v) AIM_WINDOW=v end })
+PunchTab:CreateSection("Aim Lock Modes")
+PunchTab:CreateToggle({ Name="Character Lock", CurrentValue=true, Flag="AP_CharLock",
+    Callback=function(v) aimPunchToggles["Character Lock"]=v end })
+PunchTab:CreateToggle({ Name="Camera Lock", CurrentValue=false, Flag="AP_CamLock",
+    Callback=function(v) aimPunchToggles["Camera Lock"]=v end })
 
--- AIM TAB
-local AimL = Tabs.Aim:AddGroupbox({ Side="Left", Name="Aim", IconName="crosshair" })
-AimL:AddToggle("AIM_Enabled", { Text="Enable Aim", Default=false, Tooltip="Aims at nearest killer while your ability matches keywords.", Callback=function(v) aimState.Enabled=v end })
-AimL:AddToggle("AIM_Debug", { Text="Debug (print matches)", Default=false, Callback=function(v) aimState.Debug=v end })
-AimL:AddLabel("AIM_Info", { Text = "Detecting survivor assets...", DoesWrap = true })
+-- AIM
+local AIM_InfoLabel
+AimTab:CreateSection("Aim")
+AimTab:CreateToggle({ Name="Enable Aim", CurrentValue=false, Flag="AIM_Enabled",
+    Callback=function(v) aimState.Enabled=v end })
+AimTab:CreateToggle({ Name="Debug (print matches)", CurrentValue=false, Flag="AIM_Debug",
+    Callback=function(v) aimState.Debug=v end })
+AIM_InfoLabel = AimTab:CreateLabel("Detecting survivor assets...")
 task.spawn(function()
     while true do
         task.wait(1)
@@ -1340,36 +1405,46 @@ task.spawn(function()
         for _ in pairs(aimAbilitySoundIds) do nS += 1 end
         local char = lp.Character
         local name = char and (char:GetAttribute("CharacterName") or char.Name) or "?"
-        pcall(function() Options.AIM_Info:SetText(string.format("%s — %d anim / %d sound loaded", name, nA, nS)) end)
+        updateLabel(AIM_InfoLabel, string.format("%s — %d anim / %d sound loaded", name, nA, nS))
     end
 end)
-local AimR = Tabs.Aim:AddGroupbox({ Side="Right", Name="Tuning", IconName="sliders" })
-AimR:AddDropdown("AIM_Mode", { Values={"Camera","HRP","HRP+Camera"}, Default="Camera", Text="Aim Mode", Callback=function(v) aimState.AimMode=v end })
-AimR:AddSlider("AIM_Smooth", { Text="Smoothness", Default=0.35, Min=0.05, Max=1, Rounding=2, Callback=function(v) aimState.Smooth=v end })
-AimR:AddDropdown("AIM_Predict", { Values={"Off","Ping","Velocity","Both"}, Default="Both", Text="Prediction", Callback=function(v) aimState.PredictMode=v end })
-AimR:AddSlider("AIM_Lead", { Text="Velocity Lead (s)", Default=0.15, Min=0, Max=0.5, Rounding=2, Callback=function(v) aimState.PredictLead=v end })
-AimR:AddSlider("AIM_Ping", { Text="Ping Multiplier (Gun Explosion)", Default=1.0, Min=0, Max=2, Rounding=2, Callback=function(v) aimState.PingMultiplier=v end })
+AimTab:CreateSection("Tuning")
+AimTab:CreateDropdown({ Name="Aim Mode", Options={"Camera","HRP","HRP+Camera"}, CurrentOption={"Camera"}, Flag="AIM_Mode",
+    Callback=function(opt) aimState.AimMode = type(opt) == "table" and opt[1] or opt end })
+AimTab:CreateSlider({ Name="Smoothness", Range={0.05,1}, Increment=0.05, CurrentValue=0.35, Flag="AIM_Smooth",
+    Callback=function(v) aimState.Smooth=v end })
+AimTab:CreateDropdown({ Name="Prediction", Options={"Off","Ping","Velocity","Both"}, CurrentOption={"Both"}, Flag="AIM_Predict",
+    Callback=function(opt) aimState.PredictMode = type(opt) == "table" and opt[1] or opt end })
+AimTab:CreateSlider({ Name="Velocity Lead", Range={0,0.5}, Increment=0.05, CurrentValue=0.15, Suffix="s", Flag="AIM_Lead",
+    Callback=function(v) aimState.PredictLead=v end })
+AimTab:CreateSlider({ Name="Ping Multiplier (Gun Explosion)", Range={0,2}, Increment=0.1, CurrentValue=1.0, Flag="AIM_Ping",
+    Callback=function(v) aimState.PingMultiplier=v end })
 
 -- TECHS
-local TechL = Tabs.Tech:AddGroupbox({ Side="Left", Name="HDT", IconName="cpu" })
-TechL:AddToggle("HDT_On", { Text="HDT (walk into killer on block)", Default=false, Tooltip="Survivor only. Shares 27s cooldown with Block.", Callback=function(v) hitboxDraggingTech=v end })
-TechL:AddSlider("HDT_Duration", { Text="HDT Duration", Default=1.5, Min=0.1, Max=5, Rounding=1, Suffix="s", Callback=function(v) HDT_DURATION=tonumber(v) or 1.5 end })
-TechL:AddInput("HDT_Speed", { Text="Walk speed (studs/s)", Default="8", Numeric=true, ClearTextOnFocus=false, Callback=function(v) Dspeed=tonumber(v) or 8 end })
-TechL:AddInput("HDT_Delay", { Text="Delay before walk (0 = instant)", Default="0", Numeric=true, ClearTextOnFocus=false, Callback=function(v) Ddelay=tonumber(v) or 0 end })
-TechL:AddLabel("HDT_CooldownLabel", { Text="Cooldown: Ready", DoesWrap=false })
+local HDT_CooldownLabel
+TechTab:CreateSection("HDT")
+TechTab:CreateToggle({ Name="HDT (walk into killer on block)", CurrentValue=false, Flag="HDT_On",
+    Callback=function(v) hitboxDraggingTech=v end })
+TechTab:CreateSlider({ Name="HDT Duration", Range={0.1,5}, Increment=0.1, CurrentValue=1.5, Suffix="s", Flag="HDT_Duration",
+    Callback=function(v) HDT_DURATION=v end })
+TechTab:CreateSlider({ Name="Walk Speed", Range={1,30}, Increment=1, CurrentValue=8, Flag="HDT_Speed",
+    Callback=function(v) Dspeed=v end })
+TechTab:CreateSlider({ Name="Delay Before Walk", Range={0,5}, Increment=0.1, CurrentValue=0, Suffix="s", Flag="HDT_Delay",
+    Callback=function(v) Ddelay=v end })
+HDT_CooldownLabel = TechTab:CreateLabel("Cooldown: Ready")
 task.spawn(function()
     while true do
         task.wait(0.5)
         local remaining = BLOCK_COOLDOWN - (tick() - lastBlockFireTime)
         if lastBlockFireTime > 0 and remaining > 0 and remaining <= BLOCK_COOLDOWN then
-            pcall(function() Options.HDT_CooldownLabel:SetText(string.format("Cooldown: %.1fs", remaining)) end)
+            updateLabel(HDT_CooldownLabel, string.format("Cooldown: %.1fs", remaining))
         else
-            pcall(function() Options.HDT_CooldownLabel:SetText("Cooldown: Ready") end)
+            updateLabel(HDT_CooldownLabel, "Cooldown: Ready")
         end
     end
 end)
-local TechR = Tabs.Tech:AddGroupbox({ Side="Right", Name="Exploits", IconName="terminal" })
-TechR:AddButton({ Text="Fake Lag Tech", Func=function()
+TechTab:CreateSection("Exploits")
+TechTab:CreateButton({ Name="Fake Lag Tech", Callback=function()
     pcall(function()
         local char = lp.Character or lp.CharacterAdded:Wait()
         local hum = char and char:FindFirstChildOfClass("Humanoid")
@@ -1381,79 +1456,90 @@ TechR:AddButton({ Text="Fake Lag Tech", Func=function()
 end })
 
 -- KILLER
-local KPBox = Tabs.Killer:AddGroupbox({ Side="Left", Name="Killer Auto-Parry", IconName="shield-alert" })
-KPBox:AddToggle("KP_On", { Text="Killer Auto-Parry", Default=false, Tooltip="JohnDoe (404Error) or Slasher (RagingPace). Hardcoded anim list.", Callback=function(v) killerAutoParryEnabled=v end })
-KPBox:AddInput("KP_Range",    { Text="Circle Range (studs)", Default="15", Numeric=true, ClearTextOnFocus=false, Callback=function(v) killerParryRange=tonumber(v) or 15 end })
-KPBox:AddInput("KP_Delay",    { Text="Delay (0 = instant)", Default="0",  Numeric=true, ClearTextOnFocus=false, Callback=function(v) killerParryDelay=tonumber(v) or 0 end })
-KPBox:AddInput("KP_Cooldown", { Text="Cooldown (s)",        Default="1",  Numeric=true, ClearTextOnFocus=false, Callback=function(v) killerParryCooldown=tonumber(v) or 1 end })
-KPBox:AddToggle("KP_Visual",  { Text="Show Range Circle",   Default=true, Callback=function(v) killerParryVisualOn=v end })
-KPBox:AddLabel("KP_Status",      { Text="Status: Standby", DoesWrap=false })
-KPBox:AddLabel("KP_LastTrigger", { Text="Last trigger: None", DoesWrap=false })
+KillerTab:CreateSection("Killer Auto-Parry")
+KillerTab:CreateToggle({ Name="Killer Auto-Parry", CurrentValue=false, Flag="KP_On",
+    Callback=function(v) killerAutoParryEnabled=v end })
+KillerTab:CreateSlider({ Name="Circle Range (studs)", Range={1,50}, Increment=1, CurrentValue=15, Flag="KP_Range",
+    Callback=function(v) killerParryRange=v end })
+KillerTab:CreateSlider({ Name="Delay", Range={0,3}, Increment=0.1, CurrentValue=0, Suffix="s", Flag="KP_Delay",
+    Callback=function(v) killerParryDelay=v end })
+KillerTab:CreateSlider({ Name="Cooldown", Range={0.1,5}, Increment=0.1, CurrentValue=1, Suffix="s", Flag="KP_Cooldown",
+    Callback=function(v) killerParryCooldown=v end })
+KillerTab:CreateToggle({ Name="Show Range Circle", CurrentValue=true, Flag="KP_Visual",
+    Callback=function(v) killerParryVisualOn=v end })
+KP_StatusLabel = KillerTab:CreateLabel("Status: Standby")
+KP_LastTriggerLabel = KillerTab:CreateLabel("Last trigger: None")
 
-local NoliBox = Tabs.Killer:AddGroupbox({ Side="Right", Name="Noli Void Rush", IconName="wind" })
-NoliBox:AddDropdown("NOLI_Mode", {
-    Values={"Off","Subtle","Smooth","Car"}, Default="Off", Text="Steering Mode",
-    Tooltip="Subtle = a little more controllable, not obvious\nSmooth = clearly better curved steering\nCar = instant arcade turn\n\nRequires 'require'. Applies next Noli spawn.",
-    Callback=function(v)
+KillerTab:CreateSection("Noli Void Rush")
+local NOLI_StatusLabel
+KillerTab:CreateDropdown({ Name="Steering Mode", Options={"Off","Subtle","Smooth","Car"}, CurrentOption={"Off"}, Flag="NOLI_Mode",
+    Callback=function(opt)
+        local v = type(opt) == "table" and opt[1] or opt
         noliVoidRushMode = v
         local ok = applyNoliVoidRush(v)
-        pcall(function()
-            Library:Notify({
-                Title = "Noli Void Rush",
-                Description = ok and ("Mode set to " .. v .. " — applies next Noli spawn") or "Noli config not loaded (executor lacks 'require')",
-                Time = 3,
-            })
-        end)
-    end,
-})
-NoliBox:AddLabel("NOLI_Status", { Text="Noli config: scanning...", DoesWrap=true })
+        rayfieldNotify("Noli Void Rush",
+            ok and ("Mode set to " .. v .. " — applies next Noli spawn")
+               or  "Noli config not loaded (executor lacks 'require')", 3)
+    end })
+NOLI_StatusLabel = KillerTab:CreateLabel("Noli config: scanning...")
 task.spawn(function()
-    while task.wait(2) do
-        pcall(function()
-            if noliConfig then Options.NOLI_Status:SetText("Noli config: loaded ✓")
-            else Options.NOLI_Status:SetText("Noli config: not found (executor may not support 'require')") end
-        end)
+    while true do
+        task.wait(2)
+        if noliConfig then updateLabel(NOLI_StatusLabel, "Noli config: loaded ✓")
+        else updateLabel(NOLI_StatusLabel, "Noli config: not found (executor may not support 'require')") end
     end
 end)
 
-local DashBox = Tabs.Killer:AddGroupbox({ Side="Right", Name="c00lkidd Dash", IconName="zap" })
-DashBox:AddToggle("DASH_On", { Text="Controllable Dash", Default=false, Tooltip="Steers c00lkidd's dash in your movement direction.", Callback=function(v) controllableDashEnabled=v end })
+KillerTab:CreateSection("c00lkidd Dash")
+KillerTab:CreateToggle({ Name="Controllable Dash", CurrentValue=false, Flag="DASH_On",
+    Callback=function(v) controllableDashEnabled=v end })
 
 -- GENERATOR
-local GenL = Tabs.Gen:AddGroupbox({ Side="Left", Name="Auto Generator", IconName="settings" })
-GenL:AddToggle("GEN_Auto", { Text="Auto Generator", Default=false, Tooltip="Auto-completes generators within ~6.7 studs while the puzzle UI is open.", Callback=function(v) autoGenEnabled=v end })
-GenL:AddSlider("GEN_Cooldown", { Text="Cooldown Between Completions", Default=4, Min=1.5, Max=8, Rounding=2, Callback=function(v) autoGenCooldown=v end })
-GenL:AddToggle("GEN_SpeedUp", { Text="Speed Up When Nobody's Near", Default=false, Tooltip="Drops cooldown to 1.5s when no other player is within 32 studs.", Callback=function(v) autoGenSpeedUp=v end })
+GenTab:CreateSection("Auto Generator")
+GenTab:CreateToggle({ Name="Auto Generator", CurrentValue=false, Flag="GEN_Auto",
+    Callback=function(v) autoGenEnabled=v end })
+GenTab:CreateSlider({ Name="Cooldown Between Completions", Range={0.2,8}, Increment=0.1, CurrentValue=4, Suffix="s", Flag="GEN_Cooldown",
+    Callback=function(v) autoGenCooldown=v end })
+GenTab:CreateToggle({ Name="Speed Up When Nobody's Near", CurrentValue=false, Flag="GEN_SpeedUp",
+    Callback=function(v) autoGenSpeedUp=v end })
+GenTab:CreateSection("Grid Override")
+GenTab:CreateToggle({ Name="Override Grid Size", CurrentValue=false, Flag="GEN_GridOverride",
+    Callback=function(v) autoGenGridOverride=v end })
+GenTab:CreateSlider({ Name="Grid Size", Range={4,12}, Increment=1, CurrentValue=6, Flag="GEN_GridSize",
+    Callback=function(v) autoGenGridSize=v; autoGenCurrentGrid=v end })
 
-local GenR = Tabs.Gen:AddGroupbox({ Side="Right", Name="Grid Override", IconName="settings" })
-GenR:AddToggle("GEN_GridOverride", { Text="Override Grid Size", Default=false, Tooltip="Attempts to hook FlowGame to force this grid size. Requires 'require'.", Callback=function(v) autoGenGridOverride=v end })
-GenR:AddSlider("GEN_GridSize", { Text="Grid Size", Default=6, Min=4, Max=12, Rounding=0, Callback=function(v) autoGenGridSize=v; autoGenCurrentGrid=v end })
+-- NOTICE
+NoticeTab:CreateParagraph({
+    Title = "Slashsaken [Beta]",
+    Content = "By viltrumite\n\n• Auto Block — instant, 27s cd + 0.2s anti-spam\n• Facing Circle — yellow / red / green (M1 detected)\n• HDT — survivor only, shares 27s cd with Block\n• Killer Auto-Parry — 404Error / RagingPace (hardcoded anim list)\n• Aim — own ability via ID OR name\n• Noli Void Rush — Subtle / Smooth / Car\n• Generator — full ForsakenPlus auto-gen system",
+})
 
 -- MISC
-local MiscL = Tabs.Misc:AddGroupbox({ Side="Left", Name="Chat & Lighting", IconName="message-square" })
-MiscL:AddButton({ Text="Chat Visibility", Func=function()
+MiscTab:CreateSection("Chat & Lighting")
+MiscTab:CreateButton({ Name="Chat Visibility", Callback=function()
     if TextChatService:FindFirstChild("ChatWindowConfiguration") and TextChatService:FindFirstChild("ChatInputBarConfiguration") then
         TextChatService.ChatWindowConfiguration.Enabled = true
         TextChatService.ChatInputBarConfiguration.Enabled = true
     end
 end })
 local fullbrightOriginal = {}
-MiscL:AddToggle("Misc_Fullbright", { Text="Fullbright", Default=false, Callback=function(v)
-    if v then
-        if not fullbrightOriginal.Ambient then
-            fullbrightOriginal = { Ambient=Lighting.Ambient, OutdoorAmbient=Lighting.OutdoorAmbient, Brightness=Lighting.Brightness, ClockTime=Lighting.ClockTime }
+MiscTab:CreateToggle({ Name="Fullbright", CurrentValue=false, Flag="Misc_Fullbright",
+    Callback=function(v)
+        if v then
+            if not fullbrightOriginal.Ambient then
+                fullbrightOriginal = { Ambient=Lighting.Ambient, OutdoorAmbient=Lighting.OutdoorAmbient, Brightness=Lighting.Brightness, ClockTime=Lighting.ClockTime }
+            end
+            Lighting.Ambient = Color3.new(1,1,1); Lighting.OutdoorAmbient = Color3.new(1,1,1)
+            Lighting.Brightness = 2; Lighting.ClockTime = 12
+        else
+            if fullbrightOriginal.Ambient then
+                Lighting.Ambient = fullbrightOriginal.Ambient; Lighting.OutdoorAmbient = fullbrightOriginal.OutdoorAmbient
+                Lighting.Brightness = fullbrightOriginal.Brightness; Lighting.ClockTime = fullbrightOriginal.ClockTime
+            end
         end
-        Lighting.Ambient = Color3.new(1,1,1); Lighting.OutdoorAmbient = Color3.new(1,1,1)
-        Lighting.Brightness = 2; Lighting.ClockTime = 12
-    else
-        if fullbrightOriginal.Ambient then
-            Lighting.Ambient = fullbrightOriginal.Ambient; Lighting.OutdoorAmbient = fullbrightOriginal.OutdoorAmbient
-            Lighting.Brightness = fullbrightOriginal.Brightness; Lighting.ClockTime = fullbrightOriginal.ClockTime
-        end
-    end
-end })
-local MiscR = Tabs.Misc:AddGroupbox({ Side="Right", Name="Performance", IconName="trash-2" })
-MiscR:AddButton({ Text="FPS Boost", Func=function()
+    end })
+MiscTab:CreateSection("Performance")
+MiscTab:CreateButton({ Name="FPS Boost", Callback=function()
     pcall(function()
         local t = workspace:FindFirstChildOfClass("Terrain")
         if t then t.WaterWaveSize=0; t.WaterWaveSpeed=0; t.WaterReflectance=0; t.WaterTransparency=0 end
@@ -1464,41 +1550,22 @@ MiscR:AddButton({ Text="FPS Boost", Func=function()
             elseif v:IsA("Decal") or v:IsA("Texture") then v.Transparency = 1
             elseif v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Fire") or v:IsA("Smoke") or v:IsA("Sparkles") then v.Enabled = false end
         end
-        Library:Notify({Title="FPS Boost", Description="Successfully boosted FPS!", Time=3})
+        rayfieldNotify("FPS Boost", "Successfully boosted FPS!", 3)
     end)
 end })
-MiscR:AddButton({ Text="Clear Cache", Func=function()
+MiscTab:CreateButton({ Name="Clear Cache", Callback=function()
     pcall(function()
         for _, v in ipairs(workspace:GetChildren()) do
             if v:IsA("Part") and v.Name == "AntiFlickZone" then v:Destroy() end
         end
         if gcinfo then collectgarbage("collect") end
-        Library:Notify({Title="Cache Cleaner", Description="Cleared!", Time=3})
+        rayfieldNotify("Cache Cleaner", "Cleared!", 3)
     end)
 end })
-
--- UI SETTINGS
-local UISettings = Tabs["UI Settings"]
-ThemeManager:SetLibrary(Library); SaveManager:SetLibrary(Library)
-SaveManager:IgnoreThemeSettings()
-SaveManager:SetIgnoreIndexes({ "MenuKeybind" })
-ThemeManager:SetFolder("Slashsaken"); SaveManager:SetFolder("Slashsaken/Configs")
-pcall(function() SaveManager:BuildConfigSection(UISettings) end)
-pcall(function() ThemeManager:ApplyToTab(UISettings) end)
-local MenuGroup = UISettings:AddGroupbox({ Side="Left", Name="Menu", IconName="wrench" })
-MenuGroup:AddToggle("KeybindMenuOpen", { Default=Library.KeybindFrame.Visible, Text="Open Keybind Menu", Callback=function(v) Library.KeybindFrame.Visible=v end })
-MenuGroup:AddToggle("ShowCustomCursor", { Text="Custom Cursor", Default=Library.ShowCustomCursor, Callback=function(v) Library.ShowCustomCursor=v end })
-MenuGroup:AddToggle("AlwaysOnTop", { Text="Always On Top", Default=Window.AlwaysOnTop, Callback=function(v) Window:SetAlwaysOnTop(v) end })
-MenuGroup:AddDropdown("NotifySide", { Values={"Left","Right"}, Default="Right", Text="Notification Side", Callback=function(v) Library:SetNotifySide(v) end })
-MenuGroup:AddSlider("UICorner", { Text="Corner Radius", Default=Library.CornerRadius, Min=0, Max=20, Rounding=0, Callback=function(v) Window:SetCornerRadius(v) end })
-MenuGroup:AddDivider()
-MenuGroup:AddLabel("Menu bind"):AddKeyPicker("MenuKeybind", { Default="RightShift", NoUI=true, Text="Menu keybind" })
-MenuGroup:AddButton({ Text="Unload", Func=function() Library:Unload() end })
-Library.ToggleKeybind = Options.MenuKeybind
-Library:OnUnload(function() print("Slashsaken unloaded!") end)
-
--- Stale config from a previous version can't kill the script anymore
-pcall(function() SaveManager:LoadAutoloadConfig() end)
+MiscTab:CreateSection("Script")
+MiscTab:CreateButton({ Name="Unload Script", Callback=function()
+    pcall(function() Rayfield:Destroy() end)
+end })
 
 -- ==========================================
 -- GAME LOGIC
